@@ -11,6 +11,39 @@ enum class Player {
     fun opponent() = if (this == PLAYER1) PLAYER2 else PLAYER1
 }
 
+/**
+ * GameStates:
+ *
+ * - New Game
+ * GameState(
+ *  id, rules, p1fleet=FleetLayout(ships = empty), p2fleet=..., p1missed=empty, p2missed=empty, turn=player1,
+ *  layout_phase_deadline=now+rules.layout_timeout, winner=null, phase=LAYOUT, turn_deadline=null
+ * )
+ *
+ * - When on Shooting Phase
+ * GameState(
+ *  id, rules, p1fleet=FleetLayout(ships = [...]), p2fleet=..., p1missed=[...], p2missed=[...], turn=player2,
+ *  layout_phase_deadline=now+rules.layout_timeout, winner=null, phase=SHOOTING, turn_deadline=...
+ * )
+ *
+ * Lost By Layout timeout
+ * GameState(
+ *  id, rules, p1fleet=FleetLayout(ships = [...]), p2fleet=..., p1missed=[...], p2missed=[...], turn=player2,
+ *  layout_phase_deadline=now+rules.layout_timeout, winner=null, phase=COMPLETED, turn_deadline=null
+ * )
+ *
+ * Lost By Shots timeout
+ * GameState(
+ *  id, rules, p1fleet=FleetLayout(ships = [...]), p2fleet=..., p1missed=[...], p2missed=[...], turn=player2,
+ *  layout_phase_deadline=now+rules.layout_timeout, winner=null, phase=COMPLETED, turn_deadline=null
+ * )
+ *
+ * - Player Won
+ * GameState(
+ *  id, rules, p1fleet=FleetLayout(ships = [...]), p2fleet=..., p1missed=[...], p2missed=[...], turn=player2,
+ *  layout_phase_deadline=now+rules.layout_timeout, winner=player1, phase=COMPLETED, turn_deadline=null
+ * )
+ * */
 data class GameState(
     val game_id: String,
     val rules: GameRules,
@@ -25,7 +58,6 @@ data class GameState(
 
     val turn: Player = Player.PLAYER1,
 ) {
-
     val layout_phase_deadline: Timestamp = Timestamp(System.currentTimeMillis() + rules.layout_timeout_s * 1000)
 
     val winner: Player? =
@@ -36,7 +68,12 @@ data class GameState(
         else null
 
     val game_phase =
-        if (winner != null || turnDeadlineExpired())
+        if (
+            winner != null || turnDeadlineExpired() ||
+            (
+                layoutPhaseExpired() && (player1_fleet.ships.isEmpty() || player2_fleet.ships.isEmpty())
+            )
+        )
             GamePhase.COMPLETED
         else if (player1_fleet.ships.isEmpty() || player2_fleet.ships.isEmpty())
             GamePhase.LAYOUT
@@ -106,6 +143,9 @@ data class GameState(
         if (game_phase == GamePhase.SHOOTING) {
             Timestamp(System.currentTimeMillis() + rules.shots_timeout_s * 1000)
         } else null
+
+    private fun layoutPhaseExpired(): Boolean =
+        Timestamp(System.currentTimeMillis()) > layout_phase_deadline
 }
 
 // PACKAGE API/ResponseBodies
@@ -136,6 +176,9 @@ data class GameState_GlobalResponse(
 data class GameStateDAO(
     val game_id: String,
     val rules: GameRules,
+
+    val player1_name: String,
+    val player2_name: String,
 
     val players: Map<String, Player>,
 
