@@ -1,4 +1,3 @@
-/*
 package server_domain
 
 import java.sql.Timestamp
@@ -12,7 +11,6 @@ enum class Player {
     fun opponent() = if (this == PLAYER1) PLAYER2 else PLAYER1
 }
 
-*/
 /**
  * GameStates:
  *
@@ -45,7 +43,7 @@ enum class Player {
  *  id, rules, p1fleet=FleetLayout(ships = [...]), p2fleet=..., p1missed=[...], p2missed=[...], turn=player2,
  *  layout_phase_deadline=now+rules.layout_timeout, winner=player1, phase=COMPLETED, turn_deadline=null
  * )
- * *//*
+ * */
 
 data class GameState(
     val game_id: String,
@@ -98,7 +96,7 @@ data class GameState(
 
         require(shots.none { shot ->
             myMissedShots.contains(shot) ||
-            opponentShipPartsHit.any { part -> part.row == shot.row && part.col == shot.col }
+            opponentShipPartsHit.any { part -> part.coordinates.row == shot.coordinates.row && part.coordinates.col == shot.coordinates.col }
         })
 
         // Calculate opponent ships_configurations after [shots] have been fired
@@ -137,7 +135,7 @@ data class GameState(
     }
 
     private fun hitShipPart(part: ShipPart, shot: Set<Shot>): Shot? =
-        shot.find { it.row == part.row && it.col == part.col }
+        shot.find { it.coordinates.row == part.coordinates.row && it.coordinates.col == part.coordinates.col }
 
     private fun turnDeadlineExpired(): Boolean =
         Timestamp(System.currentTimeMillis()) > turn_deadline
@@ -216,4 +214,3 @@ data class GameStateDAO(
         )
     }
 }
-*/
