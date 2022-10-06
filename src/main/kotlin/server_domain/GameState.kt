@@ -1,3 +1,4 @@
+/*
 package server_domain
 
 import java.sql.Timestamp
@@ -11,6 +12,7 @@ enum class Player {
     fun opponent() = if (this == PLAYER1) PLAYER2 else PLAYER1
 }
 
+*/
 /**
  * GameStates:
  *
@@ -43,7 +45,8 @@ enum class Player {
  *  id, rules, p1fleet=FleetLayout(ships = [...]), p2fleet=..., p1missed=[...], p2missed=[...], turn=player2,
  *  layout_phase_deadline=now+rules.layout_timeout, winner=player1, phase=COMPLETED, turn_deadline=null
  * )
- * */
+ * *//*
+
 data class GameState(
     val game_id: String,
     val rules: GameRules,
@@ -213,3 +216,4 @@ data class GameStateDAO(
         )
     }
 }
+*/

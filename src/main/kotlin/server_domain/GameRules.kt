@@ -3,6 +3,8 @@ package server_domain
 data class BoardDimensions(val rows_num: Int, val cols_num: Int)
 data class ShipConfiguration(val quantity: Int, val ship_size: Int)
 
+val Ship1 = ShipConfiguration(1, 4)
+
 data class GameRules(
 
     val board_dimensions: BoardDimensions = BoardDimensions(rows_num=1, cols_num=2),
