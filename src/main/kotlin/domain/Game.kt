@@ -45,7 +45,7 @@ enum class Player {
  * )
  * */
 
-data class GameState(
+data class Game(
     val game_id: String,
     val rules: GameRules,
 
@@ -83,7 +83,7 @@ data class GameState(
 
     val turn_deadline: Timestamp? = calculateNewTurnDeadline()
 
-    fun makeShots(me: Player, shots: Set<Shot>): GameState {
+    fun makeShots(me: Player, shots: Set<Shot>): Game {
         require(game_phase == GamePhase.SHOOTING)
         require(shots.size == rules.shots_per_round)
 
