@@ -16,7 +16,7 @@ create table if not exists users (
 );
 
 create table if not exists tokens (
-	token_value char(36) not null,
+	token_value uuid not null,
 	username varchar(15) not null,
 	
 	constraint fk_username foreign key (username) references users(username) on delete cascade,
@@ -38,7 +38,7 @@ create table if not exists gamerules(
 );
 
 create table if not exists gamestates(
-	game_id varchar(36) primary key,
+	game_id uuid primary key,
 	
 	player1 varchar(15) not null,
 	player2 varchar(15) not null,
