@@ -1,4 +1,4 @@
-package server_domain
+package domain
 
 import java.sql.Timestamp
 

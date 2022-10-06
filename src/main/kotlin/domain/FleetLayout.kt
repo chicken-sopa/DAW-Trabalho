@@ -1,4 +1,4 @@
-package server_domain
+package domain
 
 data class LayoutValidationSettings(val boardDimensions: BoardDimensions, val shipConfiguration: List<ShipConfiguration>)
 

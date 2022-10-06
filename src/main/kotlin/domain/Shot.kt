@@ -1,3 +1,3 @@
-package server_domain
+package domain
 
 data class Shot(val coordinates: Coordinates)
