@@ -1,7 +1,7 @@
 -- Delete Tables Data
 
 delete from gamerules;
-delete from gamestates;
+delete from games;
 delete from tokens;
 delete from users;
 

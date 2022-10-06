@@ -1,6 +1,6 @@
 -- Drop Tables
 
-drop table if exists gamestates;
+drop table if exists games;
 drop table if exists gamerules;
 
 drop view if exists ranking;

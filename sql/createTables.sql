@@ -37,7 +37,7 @@ create table if not exists gamerules(
     ships ShipConfiguration[] not null
 );
 
-create table if not exists gamestates(
+create table if not exists games(
 	game_id uuid primary key,
 	
 	player1 varchar(15) not null,
@@ -56,7 +56,7 @@ create table if not exists gamestates(
 	layout_phase_deadline timestamp,
 	
 	-- 0: LAYOUT | 1: SHOOTING | 2: COMPLETED
-	phase int not null check(phase in (0, 1, 2)) default 0,
+	-- phase int not null check(phase in (0, 1, 2)) default 0,
 	/*
 	phase GamePhase not null
 		default 'LAYOUT',
