@@ -3,8 +3,8 @@ insert into users
 values
 	('John Doe', 'HiPassword123#'),
 	('Diogo Jesus', 'superSecretPassword1_'),
-	('José Menezes', 'another50SecretPasswd!!'),
-	('Henrique Águas', 'Password123#')
+	('Josï¿½ Menezes', 'another50SecretPasswd!!'),
+	('Henrique ï¿½guas', 'Password123#')
 ;
 
 insert into gamerules (
@@ -20,7 +20,7 @@ insert into gamerules (
 	]::shipconfiguration[]
 );
 
-insert into gamestates
+insert into games
 (
 	game_id, player1, player2, 
 	p1_fleet, p2_fleet, 
@@ -61,5 +61,5 @@ values
 ;
 
 -- Example: GET Game State information 
-select p1_fleet[1].parts[1].is_hit from gamestates
+select p1_fleet[1].parts[1].is_hit from games
 where game_id = 'randomly-generated-uuid';
