@@ -7,17 +7,16 @@ interface UsersRepository {
 
     fun createUser(
         username: String,
-        password: String,
-        ranking_points: Int
+        password: String
     ): Boolean
 
     fun getUserByUsername(username: String): User?
 
     fun userExistsByUsername(username: String): Boolean
 
-    fun getUserByToken(token_value: UUID): User?
+    fun getUserByToken(token: UUID): User?
 
-    fun createToken(token_value: UUID, username: String): Boolean
+    fun createToken(token: UUID, username: String): Boolean
 
-    fun getUserRankingPointsByUsername(username: String): Int
+    fun getUserRankingPointsByUsername(username: String): Int?
 }
