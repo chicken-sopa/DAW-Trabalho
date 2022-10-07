@@ -1,3 +1,3 @@
-package server_domain
+package domain
 
 data class Coordinates(val row: Int, val col: Int)

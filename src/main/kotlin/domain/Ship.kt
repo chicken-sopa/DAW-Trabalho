@@ -1,4 +1,4 @@
-package server_domain
+package domain
 
 abstract class ShipPart(open val coordinates: Coordinates)
 

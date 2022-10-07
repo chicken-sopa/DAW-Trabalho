@@ -1,4 +1,4 @@
-package server_domain
+package domain
 
 import java.sql.Timestamp
 
@@ -45,11 +45,12 @@ enum class Player {
  * )
  * */
 
-data class GameState(
+data class Game(
     val game_id: String,
     val rules: GameRules,
 
-    val players: Map<String, Player>,
+    val player1: String,
+    val player2: String,
 
     val player1_fleet: FleetLayout,
     val player2_fleet: FleetLayout,
@@ -58,8 +59,10 @@ data class GameState(
     val player2_missed_shots: Set<Shot> = setOf(),
 
     val turn: Player = Player.PLAYER1,
+
+    // Default value only used when game is created
+    val layout_phase_deadline: Timestamp? = Timestamp(System.currentTimeMillis() + rules.layout_timeout_s * 1000)
 ) {
-    val layout_phase_deadline: Timestamp = Timestamp(System.currentTimeMillis() + rules.layout_timeout_s * 1000)
 
     val winner: Player? =
         if (player1_fleet.ships.all { it.isDestroyed })
@@ -70,10 +73,7 @@ data class GameState(
 
     val game_phase =
         if (
-            winner != null || turnDeadlineExpired() ||
-            (
-                layoutPhaseExpired() && (player1_fleet.ships.isEmpty() || player2_fleet.ships.isEmpty())
-            )
+            winner != null || turnDeadlineExpired() || layoutPhaseExpired()
         )
             GamePhase.COMPLETED
         else if (player1_fleet.ships.isEmpty() || player2_fleet.ships.isEmpty())
@@ -83,7 +83,7 @@ data class GameState(
 
     val turn_deadline: Timestamp? = calculateNewTurnDeadline()
 
-    fun makeShots(me: Player, shots: Set<Shot>): GameState {
+    fun makeShots(me: Player, shots: Set<Shot>): Game {
         require(game_phase == GamePhase.SHOOTING)
         require(shots.size == rules.shots_per_round)
 
@@ -146,71 +146,12 @@ data class GameState(
         } else null
 
     private fun layoutPhaseExpired(): Boolean =
-        Timestamp(System.currentTimeMillis()) > layout_phase_deadline
+        layout_phase_deadline != null
+        && Timestamp(System.currentTimeMillis()) > layout_phase_deadline
+        && (player1_fleet.ships.isEmpty() || player2_fleet.ships.isEmpty())
 }
 
-// PACKAGE API/ResponseBodies
-data class GameState_GlobalResponse(
-    val game_id: String,
-
-    val player1_name: String,
-    val player2_name: String,
-
-    // Information about THE PLAYER who made the request
-    val myShips: List<Ship> = listOf(),
-    val opponentMissedShots: List<Shot> = listOf(),
-    // Information about the OPPONENT of the player who made the request
-    val opponentShips: List<OpponentShip> = listOf(),
-    val myMissedShots: List<Shot> = listOf(),
-
-    val turn: Player = Player.PLAYER1,
-    // NULL while the game does not begin
-    val turn_deadline: Timestamp? = null,
-
-    val game_phase: GamePhase = GamePhase.LAYOUT,
-    val winner: Player? = null,
-
-    val rules: GameRules
+data class Shots_Response(
+    val opponentShips: List<OpponentShip>,
+    val myMissedShots: List<Shot>
 )
-
-// PACKAGE Repository/DAOs
-data class GameStateDAO(
-    val game_id: String,
-    val rules: GameRules,
-
-    val player1_name: String,
-    val player2_name: String,
-
-    val players: Map<String, Player>,
-
-    val player1_ships: Set<Ship> = setOf(),
-    val player2_ships: Set<Ship> = setOf(),
-
-    val player1_missed_shots: Set<Shot> = setOf(),
-    val player2_missed_shots: Set<Shot> = setOf(),
-
-    val turn: Player = Player.PLAYER1
-) {
-    fun toGameState(validateLayout: Boolean = false): GameState {
-        return GameState(
-            game_id = game_id,
-            rules = rules,
-            players = players,
-            player1_fleet = FleetLayout(
-                player1_ships,
-                if (validateLayout)
-                    LayoutValidationSettings(rules.board_dimensions, rules.ships_configurations)
-                else null
-            ),
-            player2_fleet = FleetLayout(
-                player2_ships,
-                if (validateLayout)
-                    LayoutValidationSettings(rules.board_dimensions, rules.ships_configurations)
-                else null
-            ),
-            player1_missed_shots = player1_missed_shots,
-            player2_missed_shots = player2_missed_shots,
-            turn = turn
-        )
-    }
-}
