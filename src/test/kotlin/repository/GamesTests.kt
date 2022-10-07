@@ -55,9 +55,9 @@ class GamesTests {
                     Shot(Coordinates(3, 1)),
                     Shot(Coordinates(1, 5))
                 ),
-                turn = Player.PLAYER2,
-                turn_deadline = Timestamp(System.currentTimeMillis() + 30 * 1000),
-                layout_phase_deadline = Timestamp(System.currentTimeMillis())
+                turn = Player.PLAYER1,
+                turn_deadline = null,
+                layout_phase_deadline = Timestamp(System.currentTimeMillis() + 60 * 1000)
             )
 
             val createGameOperation = gamesRepository.create(sutGame)
