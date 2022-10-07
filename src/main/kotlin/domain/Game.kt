@@ -1,6 +1,7 @@
 package domain
 
 import java.sql.Timestamp
+import java.util.UUID
 
 enum class GamePhase { LAYOUT, SHOOTING, COMPLETED }
 
@@ -16,72 +17,72 @@ enum class Player {
  *
  * - New Game
  * GameState(
- *  id, rules, p1fleet=FleetLayout(ships = empty), p2fleet=..., p1missed=empty, p2missed=empty, turn=player1,
+ *  id, rules, p1fleet=FleetLayout(ships = empty), p2fleet=..., p1missed=empty, p2missed=empty, turn=p1,
  *  layout_phase_deadline=now+rules.layout_timeout, winner=null, phase=LAYOUT, turn_deadline=null
  * )
  *
  * - When on Shooting Phase
  * GameState(
- *  id, rules, p1fleet=FleetLayout(ships = [...]), p2fleet=..., p1missed=[...], p2missed=[...], turn=player2,
+ *  id, rules, p1fleet=FleetLayout(ships = [...]), p2fleet=..., p1missed=[...], p2missed=[...], turn=p2,
  *  layout_phase_deadline=now+rules.layout_timeout, winner=null, phase=SHOOTING, turn_deadline=...
  * )
  *
  * Lost By Layout timeout
  * GameState(
- *  id, rules, p1fleet=FleetLayout(ships = [...]), p2fleet=..., p1missed=[...], p2missed=[...], turn=player2,
+ *  id, rules, p1fleet=FleetLayout(ships = [...]), p2fleet=..., p1missed=[...], p2missed=[...], turn=p2,
  *  layout_phase_deadline=now+rules.layout_timeout, winner=null, phase=COMPLETED, turn_deadline=null
  * )
  *
  * Lost By Shots timeout
  * GameState(
- *  id, rules, p1fleet=FleetLayout(ships = [...]), p2fleet=..., p1missed=[...], p2missed=[...], turn=player2,
+ *  id, rules, p1fleet=FleetLayout(ships = [...]), p2fleet=..., p1missed=[...], p2missed=[...], turn=p2,
  *  layout_phase_deadline=now+rules.layout_timeout, winner=null, phase=COMPLETED, turn_deadline=null
  * )
  *
  * - Player Won
  * GameState(
- *  id, rules, p1fleet=FleetLayout(ships = [...]), p2fleet=..., p1missed=[...], p2missed=[...], turn=player2,
- *  layout_phase_deadline=now+rules.layout_timeout, winner=player1, phase=COMPLETED, turn_deadline=null
+ *  id, rules, p1fleet=FleetLayout(ships = [...]), p2fleet=..., p1missed=[...], p2missed=[...], turn=p2,
+ *  layout_phase_deadline=now+rules.layout_timeout, winner=p1, phase=COMPLETED, turn_deadline=null
  * )
  * */
-
+// !! LATER Do not allow player1 == player2 (At services level). Maybe remove p1 and p2 from Game
 data class Game(
-    val game_id: String,
-    val rules: GameRules,
+    val game_id: UUID,
+    val rules: GameRules = GameRules(),
 
-    val player1: String,
-    val player2: String,
+    val p1: String,
+    val p2: String,
 
-    val player1_fleet: FleetLayout,
-    val player2_fleet: FleetLayout,
+    val p1_fleet: FleetLayout,
+    val p2_fleet: FleetLayout,
 
-    val player1_missed_shots: Set<Shot> = setOf(),
-    val player2_missed_shots: Set<Shot> = setOf(),
+    val p1_missed_shots: Set<Shot> = setOf(),
+    val p2_missed_shots: Set<Shot> = setOf(),
 
     val turn: Player = Player.PLAYER1,
+    // Since game starts in LAYOUT phase does not make sense to start the turn_deadline
+    // IGNORED when GamePhase != SHOOTING
+    val turn_deadline: Timestamp? = null,
 
     // Default value only used when game is created
+    // IGNORED when GamePhase != LAYOUT
     val layout_phase_deadline: Timestamp? = Timestamp(System.currentTimeMillis() + rules.layout_timeout_s * 1000)
 ) {
 
     val winner: Player? =
-        if (player1_fleet.ships.all { it.isDestroyed })
+        if (p1_fleet.ships.isNotEmpty() && p1_fleet.ships.all { it.isDestroyed })
             Player.PLAYER2
-        else if (player2_fleet.ships.all { it.isDestroyed })
+        else if (p2_fleet.ships.isNotEmpty() && p2_fleet.ships.all { it.isDestroyed })
             Player.PLAYER1
         else null
 
     val game_phase =
-        if (
-            winner != null || turnDeadlineExpired() || layoutPhaseExpired()
-        )
+        if (winner != null || turnDeadlineExpired() || layoutPhaseExpired())
             GamePhase.COMPLETED
-        else if (player1_fleet.ships.isEmpty() || player2_fleet.ships.isEmpty())
+        else if (p1_fleet.ships.isEmpty() || p2_fleet.ships.isEmpty())
             GamePhase.LAYOUT
         else
             GamePhase.SHOOTING
-
-    val turn_deadline: Timestamp? = calculateNewTurnDeadline()
 
     fun makeShots(me: Player, shots: Set<Shot>): Game {
         require(game_phase == GamePhase.SHOOTING)
@@ -89,10 +90,10 @@ data class Game(
 
         val opponent = me.opponent()
 
-        val opponentShips = if (me == Player.PLAYER1) player2_fleet.ships else player1_fleet.ships
+        val opponentShips = if (me == Player.PLAYER1) p2_fleet.ships else p1_fleet.ships
         val opponentShipPartsHit = opponentShips.flatMap { ship -> ship.parts.filter { it.isHit } }
 
-        val myMissedShots = (if (me == Player.PLAYER1) player1_missed_shots else player2_missed_shots).toMutableSet()
+        val myMissedShots = (if (me == Player.PLAYER1) p1_missed_shots else p2_missed_shots).toMutableSet()
 
         require(shots.none { shot ->
             myMissedShots.contains(shot) ||
@@ -120,17 +121,18 @@ data class Game(
         val shotsMissed = shots - shotsHit
         myMissedShots += shotsMissed
 
-        val newPlayer1_fleet = if (me == Player.PLAYER1) player1_fleet else FleetLayout(newOpponentShips)
-        val newPlayer2_fleet = if (me == Player.PLAYER2) player2_fleet else FleetLayout(newOpponentShips)
-        val newPlayer1_missed_shots = if (me == Player.PLAYER1) myMissedShots.toSet() else player1_missed_shots
-        val newPlayer2_missed_shots = if (me == Player.PLAYER2) myMissedShots.toSet() else player2_missed_shots
+        val newPlayer1_fleet = if (me == Player.PLAYER1) p1_fleet else FleetLayout(newOpponentShips)
+        val newPlayer2_fleet = if (me == Player.PLAYER2) p2_fleet else FleetLayout(newOpponentShips)
+        val newPlayer1_missed_shots = if (me == Player.PLAYER1) myMissedShots.toSet() else p1_missed_shots
+        val newPlayer2_missed_shots = if (me == Player.PLAYER2) myMissedShots.toSet() else p2_missed_shots
 
         return this.copy(
-            player1_fleet = newPlayer1_fleet,
-            player2_fleet = newPlayer2_fleet,
-            player1_missed_shots = newPlayer1_missed_shots,
-            player2_missed_shots = newPlayer2_missed_shots,
-            turn = opponent
+            p1_fleet = newPlayer1_fleet,
+            p2_fleet = newPlayer2_fleet,
+            p1_missed_shots = newPlayer1_missed_shots,
+            p2_missed_shots = newPlayer2_missed_shots,
+            turn = opponent,
+            turn_deadline = calculateNewTurnDeadline()
         )
     }
 
@@ -138,7 +140,7 @@ data class Game(
         shot.find { it.coordinates.row == part.coordinates.row && it.coordinates.col == part.coordinates.col }
 
     private fun turnDeadlineExpired(): Boolean =
-        Timestamp(System.currentTimeMillis()) > turn_deadline
+        turn_deadline != null && Timestamp(System.currentTimeMillis()) > turn_deadline
 
     private fun calculateNewTurnDeadline() =
         if (game_phase == GamePhase.SHOOTING) {
@@ -148,7 +150,7 @@ data class Game(
     private fun layoutPhaseExpired(): Boolean =
         layout_phase_deadline != null
         && Timestamp(System.currentTimeMillis()) > layout_phase_deadline
-        && (player1_fleet.ships.isEmpty() || player2_fleet.ships.isEmpty())
+        && (p1_fleet.ships.isEmpty() || p2_fleet.ships.isEmpty())
 }
 
 data class Shots_Response(

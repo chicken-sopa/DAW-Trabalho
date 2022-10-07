@@ -1,6 +1,9 @@
 package domain
 
-data class LayoutValidationSettings(val boardDimensions: BoardDimensions, val shipConfiguration: List<ShipConfiguration>)
+data class LayoutValidationSettings(
+    val boardDimensions: BoardDimensions,
+    val shipConfiguration: List<ShipConfiguration>
+)
 
 data class FleetLayout(
     val ships: Set<Ship> = setOf(),

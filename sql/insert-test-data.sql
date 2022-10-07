@@ -9,7 +9,7 @@ values
 
 insert into gamerules (
 	id, shots_per_round, shot_timeout_s, layout_timeout_s,
-	board_dimensions, ships
+	board_dimensions, ships_configuration
 ) values (
 	4, 2, 30, 90, (7, 7),
 	array[
@@ -60,6 +60,7 @@ values
 	)
 ;
 
--- Example: GET Game State information 
+/*
 select p1_fleet[1].parts[1].is_hit from games
 where game_id = '40e6215d-b5c6-4896-987c-f30f3678f608';
+*/

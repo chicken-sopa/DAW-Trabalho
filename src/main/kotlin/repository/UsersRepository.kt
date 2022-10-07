@@ -7,7 +7,7 @@ interface UsersRepository {
 
     fun createUser(
         username: String,
-        password: String
+        password_hash: String
     ): Boolean
 
     fun getUserByUsername(username: String): User?

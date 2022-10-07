@@ -3,22 +3,23 @@ package repository.jdbi
 import domain.User
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
+import org.springframework.stereotype.Repository
 import repository.UsersRepository
 import java.util.*
 
 class JdbiUsersRepository (
     private val handle: Handle
-): UsersRepository{
+): UsersRepository {
 
-    override fun createUser(username: String, password: String): Boolean =
+    override fun createUser(username: String, password_hash: String): Boolean =
         handle.createUpdate(
             """
-               insert into users(username, password) values
+               insert into users(username, password_hash) values
                (:username, :password)
             """
         )
             .bind("username", username)
-            .bind("password", password)
+            .bind("password", password_hash)
             .execute() == 1
 
     override fun getUserByUsername(username: String): User? =
@@ -44,7 +45,7 @@ class JdbiUsersRepository (
     override fun getUserByToken(token: UUID): User? =
         handle.createQuery(
             """
-               select u.username, u.password, u.ranking_points
+               select u.username, u.password_hash, u.ranking_points
                from users u, tokens t
                where t.token_value = :token
             """

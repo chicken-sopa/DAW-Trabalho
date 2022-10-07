@@ -1,7 +1,6 @@
 -- Drop Tables
-
 drop table if exists games;
-drop table if exists gamerules;
+
 
 drop view if exists ranking;
 drop table if exists tokens;
@@ -14,3 +13,5 @@ drop type if exists Coordinates;
 drop type if exists BoardDimensions;
 drop type if exists ShipConfiguration;
 
+select board_dimensions from games 
+limit 1
