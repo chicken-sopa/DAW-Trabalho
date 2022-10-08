@@ -1,3 +1,3 @@
 package domain
 
-data class Shot(val coordinates: Coordinates)
+data class Shot(val position: Position)

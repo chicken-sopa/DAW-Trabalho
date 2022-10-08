@@ -1,6 +1,6 @@
 package domain
 
-data class ShipPart(val coordinates: Coordinates, val isHit: Boolean = false)
+data class ShipPart(val position: Position, val isHit: Boolean = false)
 
 enum class ShipAlignment { HORIZONTAL, VERTICAL }
 
@@ -9,16 +9,16 @@ data class Ship(
     val isDestroyed: Boolean = parts.all { it.isHit }
 ) {
     companion object {
-        fun fromCoordinates(start: Coordinates, shipAlignment: ShipAlignment, shipSize: Int): Ship {
+        fun fromCoordinates(start: Position, shipAlignment: ShipAlignment, shipSize: Int): Ship {
             val parts = mutableListOf<ShipPart>()
             if (shipAlignment == ShipAlignment.HORIZONTAL) {
                 repeat(shipSize) { colIdx ->
-                    val newPart = ShipPart(Coordinates(start.row, start.col + colIdx))
+                    val newPart = ShipPart(Position(start.row, start.col + colIdx))
                     parts.add(newPart)
                 }
             } else {
                 repeat(shipSize) { rowIdx ->
-                    val newPart = ShipPart(Coordinates(start.row + rowIdx, start.col))
+                    val newPart = ShipPart(Position(start.row + rowIdx, start.col))
                     parts.add(newPart)
                 }
             }
@@ -27,9 +27,7 @@ data class Ship(
     }
 }
 
-data class OpponentShipPart(val coordinates: Coordinates)
-
-data class OpponentShip(
-    val hitParts: List<OpponentShipPart>,
+data class PartialShip(
+    val hitParts: List<ShipPart>,
     val isDestroyed: Boolean = false
 )

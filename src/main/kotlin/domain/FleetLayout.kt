@@ -1,45 +1,29 @@
 package domain
 
-data class LayoutValidationSettings(
-    val boardDimensions: BoardDimensions,
-    val shipConfiguration: List<ShipConfiguration>
-)
-
-data class FleetLayout(
-    val ships: Set<Ship> = setOf(),
-    val validation: LayoutValidationSettings? = null,
+fun validateFleetLayout(
+    fleet: Set<Ship>,
+    boardDimensions: BoardDimensions,
+    allowedShipConfigurations: List<ShipConfiguration>
 ) {
-    init {
-        if (validation != null)
-            validate()
+    // Make sure no ship part is out of board
+    fleet.forEach { ship ->
+        ship.parts.forEach{shipPart->
+            if (shipPart.position.col !in 0 until boardDimensions.cols_num)
+                throw Exception("error on validate ships need to specify")
+
+            if (shipPart.position.row !in 0 until boardDimensions.rows_num)
+                throw Exception("error on validate ships need to specify")
+        }
     }
 
-    private fun validate(): Boolean{
-        requireNotNull(validation)
-
-        /**
-         * TODO: Validate Ship positions:
-         *  - No Ship part falls out of board
-         *  - Every ship is complete
-         **/
-
-        ships.forEach{ ship ->
-            ship.parts.forEach{shipPart->
-                if( shipPart.coordinates.col !in 0 until validation.boardDimensions.cols_num )
-                    throw Exception("error on validate ships need to specify" )
-
-                if( shipPart.coordinates.row !in 0 until validation.boardDimensions.rows_num)
-                    throw Exception("error on validate ships need to specify" )
-            }
-        }
-
-        validation.shipConfiguration.forEach{shipConfiguration ->
-            if(shipConfiguration.quantity != ships.count { ship -> ship.parts.size == shipConfiguration.ship_size })
-                throw Exception("error on validate ships need to specify" )
-        }
-
-
-
-        return true
+    // Make sure all ships match the allowedShipConfigurations
+    allowedShipConfigurations.forEach { shipConfig ->
+        if (shipConfig.quantity != fleet.count { ship -> ship.parts.size == shipConfig.ship_size })
+            throw Exception("error on validate ships need to specify")
     }
+
+    // TODO
+    // ship parts do not collide
+    // ship parts are in sequence
+    // <= 1 square spacing among ships
 }
