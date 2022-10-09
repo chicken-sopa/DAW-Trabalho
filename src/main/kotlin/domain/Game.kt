@@ -53,23 +53,18 @@ data class Game(
         else
             GamePhase.SHOOTING
 
-    @Throws(Exception::class)
-    fun submitFleetLayout(me: Player, ships: Set<Ship>): Game {
-        check(game_phase == GamePhase.LAYOUT)
-        { "Can't submit layout when game is not in Layout phase" }
+    sealed class FleetLayoutResult {
+        object NotLayoutPhase: FleetLayoutResult()
+        object AlreadySubmitted: FleetLayoutResult()
+        data class Success(val newGame: Game): FleetLayoutResult()
+    }
 
-        if (me == Player.PLAYER1)
-            check(p1_fleet.isEmpty()) { "You have already submitted a fleet layout" }
-        else
-            check(p2_fleet.isEmpty()) { "You have already submitted a fleet layout" }
-
-        validateFleetLayout(ships, rules.board_dimensions, rules.ships_configurations)
-
-        // Not throw -> valid fleet layout
-        return if (me == Player.PLAYER1)
-            this.copy(p1_fleet = ships)
-        else
-            this.copy(p2_fleet = ships)
+    sealed class RoundResult {
+        object NotShootingPhase: RoundResult()
+        object NotYourTurn: RoundResult()
+        object InvalidNumberOfShots: RoundResult()
+        object RepeatedShot: RoundResult()
+        data class Success(val newGame: Game): RoundResult()
     }
 
     sealed class GameCompletionReason {
@@ -79,32 +74,32 @@ data class Game(
         object Unknown: GameCompletionReason()
     }
 
-    fun gameCompletionReason(): GameCompletionReason {
-        check(game_phase == GamePhase.COMPLETED)
-        { "Game is not completed yet" }
+    fun submitFleetLayout(me: Player, ships: Set<Ship>): FleetLayoutResult {
+        if (game_phase != GamePhase.LAYOUT)
+            return FleetLayoutResult.NotLayoutPhase
 
-        // "Normal" win
-        if (winner != null && (p1_fleet.all { it.isDestroyed } || p2_fleet.all { it.isDestroyed }))
-            return GameCompletionReason.FleetSunk(winner)
+        if (me == Player.PLAYER1)
+            if (p1_fleet.isNotEmpty())
+                return FleetLayoutResult.AlreadySubmitted
+        else
+            if (p2_fleet.isNotEmpty())
+                return FleetLayoutResult.AlreadySubmitted
 
-        // Layout timeout (no winner)
-        if (winner == null && (p1_fleet.isEmpty() || p2_fleet.isEmpty()))
-            return GameCompletionReason.LayoutTimeout
+        validateFleetLayout(ships, rules.board_dimensions, rules.ships_configurations)
 
-        // None of the fleets are sunk but there is a winner + NOT (Layout timeout)
-        if (winner != null && !p1_fleet.all { it.isDestroyed } && !p2_fleet.all { it.isDestroyed })
-            return GameCompletionReason.Forfeit(winner)
-
-        return GameCompletionReason.Unknown
+        // Not throw -> valid fleet layout
+        return FleetLayoutResult.Success(
+            newGame = if (me == Player.PLAYER1)
+                this.copy(p1_fleet = ships)
+            else
+                this.copy(p2_fleet = ships)
+        )
     }
 
-    fun makeShots(me: Player, shots: Set<Shot>): Game {
-        check(game_phase == GamePhase.SHOOTING)
-        { "Game not in shooting phase" }
-        check(turn == me)
-        { "Not your turn" }
-        require(shots.size == rules.shots_per_round)
-        { "The number of shots needs to be exactly ${rules.shots_per_round}" }
+    fun makeShots(me: Player, shots: Set<Shot>): RoundResult {
+        if (game_phase != GamePhase.SHOOTING) return RoundResult.NotShootingPhase
+        if (turn != me) return RoundResult.NotYourTurn
+        if (shots.size != rules.shots_per_round) return RoundResult.InvalidNumberOfShots
 
         val opponent = me.opponent()
 
@@ -113,12 +108,12 @@ data class Game(
 
         val myMissedShots = (if (me == Player.PLAYER1) p1_missed_shots else p2_missed_shots).toMutableSet()
 
-        check(
-            shots.none { shot ->
+        if (
+            !shots.none { shot ->
                 myMissedShots.contains(shot) ||
                 opponentShipPartsHit.any { part -> part.position.row == shot.position.row && part.position.col == shot.position.col }
             }
-        ) { "Can't fire a shot at the same place twice" }
+        ) return RoundResult.RepeatedShot
 
         // Calculate opponent ships_configurations after [shots] have been fired
         val shotsHit = mutableSetOf<Shot>()
@@ -141,20 +136,43 @@ data class Game(
         val shotsMissed = shots - shotsHit
         myMissedShots += shotsMissed
 
-        val newPlayer1_fleet = if (me == Player.PLAYER1) p1_fleet else newOpponentShips
-        val newPlayer2_fleet = if (me == Player.PLAYER2) p2_fleet else newOpponentShips
-        val newPlayer1_missed_shots = if (me == Player.PLAYER1) myMissedShots.toSet() else p1_missed_shots
-        val newPlayer2_missed_shots = if (me == Player.PLAYER2) myMissedShots.toSet() else p2_missed_shots
+        val newPlayer1Fleet = if (me == Player.PLAYER1) p1_fleet else newOpponentShips
+        val newPlayer2Fleet = if (me == Player.PLAYER2) p2_fleet else newOpponentShips
+        val newPlayer1MissedShots = if (me == Player.PLAYER1) myMissedShots.toSet() else p1_missed_shots
+        val newPlayer2MissedShots = if (me == Player.PLAYER2) myMissedShots.toSet() else p2_missed_shots
 
-        return this.copy(
-            p1_fleet = newPlayer1_fleet,
-            p2_fleet = newPlayer2_fleet,
-            p1_missed_shots = newPlayer1_missed_shots,
-            p2_missed_shots = newPlayer2_missed_shots,
-            turn = opponent,
-            turn_deadline = calculateNewTurnDeadline()
+        return RoundResult.Success(
+            this.copy(
+                p1_fleet = newPlayer1Fleet,
+                p2_fleet = newPlayer2Fleet,
+                p1_missed_shots = newPlayer1MissedShots,
+                p2_missed_shots = newPlayer2MissedShots,
+                turn = opponent,
+                turn_deadline = calculateNewTurnDeadline()
+            )
         )
     }
+
+    fun gameCompletionReason(): GameCompletionReason {
+        check(game_phase == GamePhase.COMPLETED)
+        { "Game is not completed" }
+
+        // "Normal" win
+        if (winner != null && (p1_fleet.all { it.isDestroyed } || p2_fleet.all { it.isDestroyed }))
+            return GameCompletionReason.FleetSunk(winner)
+
+        // Layout timeout (no winner)
+        if (winner == null && (p1_fleet.isEmpty() || p2_fleet.isEmpty()))
+            return GameCompletionReason.LayoutTimeout
+
+        // None of the fleets are sunk but there is a winner + NOT (Layout timeout)
+        if (winner != null && !p1_fleet.all { it.isDestroyed } && !p2_fleet.all { it.isDestroyed })
+            return GameCompletionReason.Forfeit(winner)
+
+        return GameCompletionReason.Unknown
+    }
+
+    // Extra/Auxiliary Functionality
 
     fun whichPlayer(username: String): Player? =
         when(username) {

@@ -71,7 +71,8 @@ class GameTests {
             )
         }
 
-        assert(updatedGame.p1_fleet.isNotEmpty())
+        assert(updatedGame is Game.FleetLayoutResult.Success)
+        assert((updatedGame as Game.FleetLayoutResult.Success).newGame.p1_fleet.isNotEmpty())
     }
 
     @Test
@@ -112,17 +113,23 @@ class GameTests {
         )
 
         val gameAfterP1FleetLayout = assertDoesNotThrow {
-            sutGame.submitFleetLayout(
-                Player.PLAYER1,
-                validFleet
-            )
+            (
+                sutGame.submitFleetLayout(
+                    Player.PLAYER1,
+                    validFleet
+                ) as Game.FleetLayoutResult.Success
+            ).newGame
         }
 
+
         val updatedGame = assertDoesNotThrow {
-            gameAfterP1FleetLayout.submitFleetLayout(
-                Player.PLAYER2,
-                validFleet
-            )
+            (
+                gameAfterP1FleetLayout
+                    .submitFleetLayout(
+                    Player.PLAYER2,
+                    validFleet
+                ) as Game.FleetLayoutResult.Success
+            ).newGame
         }
 
         assert(updatedGame.p1_fleet.isNotEmpty())
@@ -140,18 +147,20 @@ class GameTests {
         )
 
         val gameAfterP1FleetLayout = assertDoesNotThrow {
-            sutGame.submitFleetLayout(
-                Player.PLAYER1,
-                validFleet
-            )
+            (
+                sutGame.submitFleetLayout(
+                    Player.PLAYER1,
+                    validFleet
+                ) as Game.FleetLayoutResult.Success
+            ).newGame
         }
 
-        assertThrows<java.lang.IllegalStateException> {
-            gameAfterP1FleetLayout.submitFleetLayout(
-                Player.PLAYER1,
-                setOf()
-            )
-        }
+        val fleetLayoutResult = gameAfterP1FleetLayout.submitFleetLayout(
+            Player.PLAYER1,
+            setOf()
+        )
+
+        assert(fleetLayoutResult is Game.FleetLayoutResult.AlreadySubmitted)
     }
 
     @Test
@@ -167,10 +176,14 @@ class GameTests {
 
         val shots = setOf(Shot(Position(0, 1)), Shot(Position(3, 3)))
 
-        val game1 = sutGame.makeShots(
-            Player.PLAYER1,
-            shots
-        )
+        val game1 =
+            (
+                sutGame.makeShots(
+                    Player.PLAYER1,
+                    shots
+                ) as Game.RoundResult.Success
+            ).newGame
+
 
         assertEquals(game1.turn, Player.PLAYER2)
         // Should be calculated when makeShots builds a new game
@@ -196,10 +209,13 @@ class GameTests {
 
         val shots = setOf(Shot(Position(1, 1)), Shot(Position(3, 3)))
 
-        val game1 = sutGame.makeShots(
-            Player.PLAYER1,
-            shots
-        )
+        val game1 =
+            (
+                sutGame.makeShots(
+                    Player.PLAYER1,
+                    shots
+                ) as Game.RoundResult.Success
+            ).newGame
 
         assertEquals(game1.turn, Player.PLAYER2)
         // Should be calculated when makeShots builds a new game
