@@ -126,9 +126,9 @@ class GameTests {
             (
                 gameAfterP1FleetLayout
                     .submitFleetLayout(
-                    Player.PLAYER2,
-                    validFleet
-                ) as Game.FleetLayoutResult.Success
+                        Player.PLAYER2,
+                        validFleet
+                    ) as Game.FleetLayoutResult.Success
             ).newGame
         }
 
