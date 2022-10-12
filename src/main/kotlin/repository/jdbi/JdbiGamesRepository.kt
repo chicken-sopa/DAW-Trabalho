@@ -8,7 +8,7 @@ import repository.jdbi.utils.gson
 import repository.jdbi.utils.toJsonString
 import java.sql.Timestamp
 import java.util.*
-import com.google.gson.reflect.TypeToken
+import io.leangen.geantyref.TypeToken
 
 class JdbiGamesRepository(
     private val handle: Handle,

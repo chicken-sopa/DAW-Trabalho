@@ -23,7 +23,7 @@ fun validateFleetLayout(
     // Make sure all ships match the allowedShipConfigurations
     allowedShipConfigurations.forEach { shipConfig ->
         if (shipConfig.quantity != fleet.count { ship -> ship.parts.size == shipConfig.ship_size })
-            return Result.Failure(FleetLayoutError.INVALID)
+            throw Exception("error on validate ships need to specify")
     }
 
     // TODO
