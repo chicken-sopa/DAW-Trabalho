@@ -21,6 +21,9 @@ create table if not exists users (
 
 	password_hash varchar not null,
 
+    games_played int not null default 0,
+    games_won int not null default 0,
+
 	ranking_points int not null default 0
 );
 

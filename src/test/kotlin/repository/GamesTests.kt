@@ -7,7 +7,6 @@ import repository.jdbi.JdbiGamesRepository
 import repository.jdbi.JdbiUsersRepository
 import repository.jdbi.utils.gson
 import utils.testWithHandleAndRollback
-import java.sql.Timestamp
 import java.util.*
 
 class GamesTests {
@@ -41,25 +40,11 @@ class GamesTests {
             val newGameID = UUID.randomUUID()
 
             val sutGame = Game(
-                game_id = newGameID,
-                rules = GameRules(),
+                newGameID,
+                GameRules(),
                 TEST_USER_1.username,
                 TEST_USER_2.username,
-                p1_fleet = FleetLayout(),
-                p2_fleet = FleetLayout(),
-                p1_missed_shots = setOf(
-                    Shot(Coordinates(1, 2)),
-                    Shot(Coordinates(3, 0))
-                ),
-                p2_missed_shots = setOf(
-                    Shot(Coordinates(3, 1)),
-                    Shot(Coordinates(1, 5))
-                ),
-                turn = Player.PLAYER1,
-                turn_deadline = null,
-                layout_phase_deadline = Timestamp(System.currentTimeMillis() + 60 * 1000)
             )
-
             val createGameOperation = gamesRepository.create(sutGame)
             assert(createGameOperation)
 

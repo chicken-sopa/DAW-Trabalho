@@ -112,7 +112,8 @@ data class GameDbModel(
 ) {
     fun toGame(): Game {
         val ships_configuration_list_type = object : TypeToken<List<ShipConfiguration>>() {}.type
-        val shots_list_type = object : TypeToken<Set<Shot>>() {}.type
+        val shots_set_type = object : TypeToken<Set<Shot>>() {}.type
+        val ships_set_type = object : TypeToken<Set<Ship>>() {}.type
 
         return gson().let { gson ->
             Game(
@@ -126,10 +127,10 @@ data class GameDbModel(
                 ),
                 p1,
                 p2,
-                p1_fleet = gson.fromJson(p1_fleet, FleetLayout::class.java),
-                p2_fleet = gson.fromJson(p2_fleet, FleetLayout::class.java),
-                p1_missed_shots = gson.fromJson(p1_missed_shots, shots_list_type),
-                p2_missed_shots = gson.fromJson(p2_missed_shots, shots_list_type),
+                p1_fleet = gson.fromJson(p1_fleet, ships_set_type),
+                p2_fleet = gson.fromJson(p2_fleet, ships_set_type),
+                p1_missed_shots = gson.fromJson(p1_missed_shots, shots_set_type),
+                p2_missed_shots = gson.fromJson(p2_missed_shots, shots_set_type),
                 turn,
                 turn_deadline,
                 layout_phase_deadline
