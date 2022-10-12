@@ -11,8 +11,8 @@ import java.util.*
 
 class GamesTests {
 
-    private val TEST_USER_1 = User("TEST_USER_1", "password_hash_simulation")
-    private val TEST_USER_2 = User("TEST_USER_2", "password_hash_simulation")
+    private val TEST_USER_1 = User("TEST_USER_1", "password_hash_simulation", 0, 0)
+    private val TEST_USER_2 = User("TEST_USER_2", "password_hash_simulation", 0, 0)
 
     private fun prepareTestEnvironment(handle: Handle) {
         val usersRepo = JdbiUsersRepository(handle)
@@ -41,7 +41,6 @@ class GamesTests {
 
             val sutGame = Game(
                 newGameID,
-                GameRules(),
                 TEST_USER_1.username,
                 TEST_USER_2.username,
             )

@@ -2,11 +2,11 @@ package domain
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
-import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import Result
 
 class GameTests {
 
@@ -37,7 +37,6 @@ class GameTests {
     fun `Create game and verify state`() {
         val sutGame = Game(
             TEST_GAME_ID,
-            GameRules(),
             "player1",
             "player2"
         )
@@ -45,7 +44,7 @@ class GameTests {
         assertEquals(sutGame.turn, Player.PLAYER1)
         assertEquals(sutGame.turn_deadline, null)
         assertNotNull(sutGame.layout_phase_deadline)
-        assertEquals(sutGame.game_phase, GamePhase.LAYOUT)
+        assertEquals(sutGame.phase, GamePhase.LAYOUT)
         assertNull(sutGame.winner)
     }
 
@@ -53,39 +52,36 @@ class GameTests {
     fun `Submit valid fleet layout of Player1 to game`() {
         val sutGame = Game(
             TEST_GAME_ID,
-            rules,
             "player1",
-            "player2"
+            "player2",
+            rules
         )
 
         assertEquals(sutGame.turn, Player.PLAYER1)
         assertEquals(sutGame.turn_deadline, null)
         assertNotNull(sutGame.layout_phase_deadline)
-        assertEquals(sutGame.game_phase, GamePhase.LAYOUT)
+        assertEquals(sutGame.phase, GamePhase.LAYOUT)
         assertNull(sutGame.winner)
 
-        val updatedGame = assertDoesNotThrow {
-            sutGame.submitFleetLayout(
-                Player.PLAYER1,
-                validFleet
-            )
-        }
+        val fleetLayoutResult = sutGame.submitFleetLayout(
+            Player.PLAYER1,
+            validFleet
+        )
 
-        assert(updatedGame is Game.FleetLayoutResult.Success)
-        assert((updatedGame as Game.FleetLayoutResult.Success).newGame.p1_fleet.isNotEmpty())
+        assert(fleetLayoutResult is Result.Success)
+        assert((fleetLayoutResult as Result.Success).value.p1_fleet.isNotEmpty())
     }
 
     @Test
     fun `Submit invalid fleet layout of Player1 to game`() {
         val sutGame = Game(
             TEST_GAME_ID,
-            rules,
             "player1",
-            "player2"
+            "player2",
+            rules
         )
 
-        assertThrows<Exception> {
-            sutGame.submitFleetLayout(
+        val fleetLayoutResult = sutGame.submitFleetLayout(
                 Player.PLAYER1,
                 setOf(
                     Ship(
@@ -100,16 +96,18 @@ class GameTests {
                     )
                 )
             )
-        }
+
+        assert(fleetLayoutResult is Result.Failure)
+        assert((fleetLayoutResult as Result.Failure).value is FleetLayoutError.INVALID)
     }
 
     @Test
     fun `Submit valid fleet layout of Player1 and Player2 to check game phase updated`() {
         val sutGame = Game(
             TEST_GAME_ID,
-            rules,
             "player1",
-            "player2"
+            "player2",
+            rules
         )
 
         val gameAfterP1FleetLayout = assertDoesNotThrow {
@@ -117,10 +115,9 @@ class GameTests {
                 sutGame.submitFleetLayout(
                     Player.PLAYER1,
                     validFleet
-                ) as Game.FleetLayoutResult.Success
-            ).newGame
+                ) as Result.Success
+            ).value
         }
-
 
         val updatedGame = assertDoesNotThrow {
             (
@@ -128,22 +125,22 @@ class GameTests {
                     .submitFleetLayout(
                         Player.PLAYER2,
                         validFleet
-                    ) as Game.FleetLayoutResult.Success
-            ).newGame
+                    ) as Result.Success
+            ).value
         }
 
         assert(updatedGame.p1_fleet.isNotEmpty())
         assert(updatedGame.p2_fleet.isNotEmpty())
-        assertEquals(updatedGame.game_phase, GamePhase.SHOOTING)
+        assertEquals(updatedGame.phase, GamePhase.SHOOTING)
     }
 
     @Test
     fun `Submit layout twice for same Player`() {
         val sutGame = Game(
             TEST_GAME_ID,
-            rules,
             "player1",
             "player2",
+            rules
         )
 
         val gameAfterP1FleetLayout = assertDoesNotThrow {
@@ -151,8 +148,8 @@ class GameTests {
                 sutGame.submitFleetLayout(
                     Player.PLAYER1,
                     validFleet
-                ) as Game.FleetLayoutResult.Success
-            ).newGame
+                ) as Result.Success
+            ).value
         }
 
         val fleetLayoutResult = gameAfterP1FleetLayout.submitFleetLayout(
@@ -160,36 +157,35 @@ class GameTests {
             setOf()
         )
 
-        assert(fleetLayoutResult is Game.FleetLayoutResult.AlreadySubmitted)
+        assert(fleetLayoutResult is Result.Failure)
+        assert((fleetLayoutResult as Result.Failure).value is FleetLayoutError.AlreadySubmitted)
     }
 
     @Test
     fun `Make valid shots swaps turn`() {
         val sutGame = Game(
             TEST_GAME_ID,
-            rules,
             "player1",
             "player2",
+            rules,
             validFleet,
             validFleet
         )
 
         val shots = setOf(Shot(Position(0, 1)), Shot(Position(3, 3)))
 
-        val game1 =
-            (
-                sutGame.makeShots(
-                    Player.PLAYER1,
-                    shots
-                ) as Game.RoundResult.Success
-            ).newGame
+        var updatedGame = sutGame
+        for (shot in shots) {
+            val makeShotResult = updatedGame.makeShot(Player.PLAYER1, shot)
+            assert(makeShotResult is Result.Success)
+            updatedGame = (makeShotResult as Result.Success).value
+        }
 
-
-        assertEquals(game1.turn, Player.PLAYER2)
+        assertEquals(Player.PLAYER2, updatedGame.turn)
         // Should be calculated when makeShots builds a new game
-        assertNotNull(game1.turn_deadline)
+        assertNotNull(updatedGame.turn_deadline)
         assertEquals(
-            game1.p2_fleet.flatMap { it.parts }.count { it.isHit },
+            updatedGame.p2_fleet.flatMap { it.parts }.count { it.isHit },
             shots.size
         )
     }
@@ -198,9 +194,9 @@ class GameTests {
     fun `Make valid shots, some missed`() {
         val sutGame = Game(
             TEST_GAME_ID,
-            rules,
             "player1",
             "player2",
+            rules,
             validFleet,
             validFleet,
             setOf(),
@@ -209,22 +205,21 @@ class GameTests {
 
         val shots = setOf(Shot(Position(1, 1)), Shot(Position(3, 3)))
 
-        val game1 =
-            (
-                sutGame.makeShots(
-                    Player.PLAYER1,
-                    shots
-                ) as Game.RoundResult.Success
-            ).newGame
+        var updatedGame = sutGame
+        for (shot in shots) {
+            val makeShotResult = updatedGame.makeShot(Player.PLAYER1, shot)
+            assert(makeShotResult is Result.Success)
+            updatedGame = (makeShotResult as Result.Success).value
+        }
 
-        assertEquals(game1.turn, Player.PLAYER2)
+        assertEquals(updatedGame.turn, Player.PLAYER2)
         // Should be calculated when makeShots builds a new game
-        assertNotNull(game1.turn_deadline)
+        assertNotNull(updatedGame.turn_deadline)
         assertEquals(
-            game1.p2_fleet.flatMap { it.parts }.count { it.isHit },
+            updatedGame.p2_fleet.flatMap { it.parts }.count { it.isHit },
             1
         )
-        assertEquals(game1.p1_missed_shots.size, 1)
-        assert(game1.p1_missed_shots.contains(Shot(Position(1, 1))))
+        assertEquals(1, updatedGame.p1_missed_shots.size)
+        assert(updatedGame.p1_missed_shots.contains(Shot(Position(1, 1))))
     }
 }

@@ -21,12 +21,12 @@ class JdbiGamesRepository(
                insert into games
                (
                     game_id, p1, p2, p1_fleet, p2_fleet, p1_missed_shots, p2_missed_shots, 
-                    turn, turn_deadline, layout_phase_deadline, 
+                    turn, turn_shots_counter, turn_deadline, layout_phase_deadline, 
                     board_dimensions, ships_configuration, shots_per_round, layout_timeout_s, shot_timeout_s
                ) values
                (
                     :game_id, :p1, :p2, :p1_fleet, :p2_fleet, :p1_missed_shots, :p2_missed_shots, 
-                    :turn, :turn_deadline, :layout_phase_deadline, 
+                    :turn, :turn_shots_counter, :turn_deadline, :layout_phase_deadline, 
                     :board_dimensions, :ships_configuration, :shots_per_round, :layout_timeout_s, :shot_timeout_s
                )
             """
@@ -39,6 +39,7 @@ class JdbiGamesRepository(
                 .bind("p1_missed_shots", newGame.p1_missed_shots)
                 .bind("p2_missed_shots", newGame.p2_missed_shots)
                 .bind("turn", newGame.turn)
+                .bind("turn_shots_counter", newGame.turn_shots_counter)
                 .bind("turn_deadline", newGame.turn_deadline)
                 .bind("layout_phase_deadline", newGame.layout_phase_deadline)
                 .bind("board_dimensions", newGame.board_dimensions)
@@ -69,7 +70,8 @@ class JdbiGamesRepository(
                 p1 = :p1, p2 = :p2, 
                 p1_fleet = :p1_fleet, p2_fleet = :p2_fleet, 
                 p1_missed_shots = :p1_missed_shots, p2_missed_shots = :p2_missed_shots, 
-                turn = :turn, turn_deadline = :turn_deadline, layout_phase_deadline = :layout_phase_deadline, 
+                turn = :turn, turn_shots_counter = :turn_shots_counter
+                turn_deadline = :turn_deadline, layout_phase_deadline = :layout_phase_deadline, 
                 
                 where game_id = :game_id
             """
@@ -82,6 +84,7 @@ class JdbiGamesRepository(
             .bind("p1_missed_shots", game.p1_missed_shots)
             .bind("p2_missed_shots", game.p2_missed_shots)
             .bind("turn", game.turn)
+            .bind("turn_shots_counter", game.turn_shots_counter)
             .bind("turn_deadline", game.turn_deadline)
             .bind("layout_phase_deadline", game.layout_phase_deadline)
             .execute() == 1
@@ -100,9 +103,11 @@ data class GameDbModel(
     val p2_missed_shots: String,
 
     val turn: Player,
+    val turn_shots_counter: Int,
     val turn_deadline: Timestamp?,
     val layout_phase_deadline: Timestamp?,
 
+    // Game Rules Information
     val board_dimensions: String,
     val ships_configuration: String,
 
@@ -118,6 +123,8 @@ data class GameDbModel(
         return gson().let { gson ->
             Game(
                 game_id,
+                p1,
+                p2,
                 GameRules(
                     board_dimensions = gson.fromJson(board_dimensions, BoardDimensions::class.java),
                     ships_configurations = gson.fromJson(ships_configuration, ships_configuration_list_type),
@@ -125,13 +132,12 @@ data class GameDbModel(
                     layout_timeout_s,
                     shot_timeout_s
                 ),
-                p1,
-                p2,
                 p1_fleet = gson.fromJson(p1_fleet, ships_set_type),
                 p2_fleet = gson.fromJson(p2_fleet, ships_set_type),
                 p1_missed_shots = gson.fromJson(p1_missed_shots, shots_set_type),
                 p2_missed_shots = gson.fromJson(p2_missed_shots, shots_set_type),
                 turn,
+                turn_shots_counter,
                 turn_deadline,
                 layout_phase_deadline
             )
@@ -149,6 +155,7 @@ data class GameDbModel(
                 game.p1_missed_shots.toJsonString(),
                 game.p2_missed_shots.toJsonString(),
                 game.turn,
+                game.turn_shots_counter,
                 game.turn_deadline,
                 game.layout_phase_deadline,
 

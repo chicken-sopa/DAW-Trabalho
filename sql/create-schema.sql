@@ -49,17 +49,10 @@ create table if not exists games(
 	p2_missed_shots varchar not null,
 
 	-- 0: PLAYER1 | 1: PLAYER1
+	turn_shots_counter int not null,
 	turn varchar not null,
 	turn_deadline timestamp,
 	layout_phase_deadline timestamp,
-
-	-- 0: LAYOUT | 1: SHOOTING | 2: COMPLETED
-	-- phase int not null check(phase in (0, 1, 2)) default 0,
-	/*
-	phase GamePhase not null
-		default 'LAYOUT',
-	*/
-	-- winner int check(winner in (null, 0, 1)) default null,	
 	
 	board_dimensions varchar not null,
     ships_configuration varchar not null,
