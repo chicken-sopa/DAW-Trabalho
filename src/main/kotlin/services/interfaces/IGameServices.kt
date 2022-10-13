@@ -12,7 +12,7 @@ interface IGameServices {
     fun submitFleet(token: UUID, game_id: UUID, fleet: List<Ship>): Boolean
 
     // Allow an user to define a set of shots on each round.
-    fun makeShot(token: UUID, game_id: UUID, shot: Shot): Game
+    fun makeShot(token: UUID, game_id: UUID, shot: Shot): Boolean
 
     // Inform the user about the state of its fleet.
     fun getMyFleet(token: UUID, game_id: UUID): List<Ship>

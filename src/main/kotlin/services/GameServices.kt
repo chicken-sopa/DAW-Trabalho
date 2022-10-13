@@ -1,8 +1,8 @@
 package services
 
+import Result
 import domain.game.*
 import repository.TransactionManager
-import repository.jdbi.JdbiGamesRepository
 import services.interfaces.IGameServices
 import java.util.*
 
@@ -14,25 +14,31 @@ class GameServices(
         TODO("Not yet implemented")
     }
 
-    override fun makeShot(token: UUID, game_id: UUID, shot: Shot): Game {
-        val game = repository.getById(game_id)
-        // require that exists a game in database
-        requireNotNull(game)
+    override fun makeShot(token: UUID, game_id: UUID, shot: Shot): Boolean {
+        return transactionManager.run {
+            val gamesRepo = it.gamesRepository
+            val game = gamesRepo.getById(game_id)
+            // TODO: throw GameNotFound later
+            requireNotNull(game)
 
-        // updateGame and save in database
-        val resultOfMakeShot = game.makeShot(game.turn, newShots)
+            // val username = it.userRepository.getByToken(token)
+            // val player = game.whichPlayer(username)
+            // pass "player" to game.makeShot(player, shot)
 
-        if(resultOfMakeShot is ActionResult.Success){
-            val updatedGame = resultOfMakeShot.value
-            val update = repository.update(updatedGame)
+            // updateGame and save in database
+            val resultOfMakeShot = game.makeShot(game.turn, shot)
 
-            // if bd update does not go right the send error
-            if(!update){
+            if(resultOfMakeShot is Result.Success){
+                val updatedGame = resultOfMakeShot.value
+                val updateResult = gamesRepo.update(updatedGame)
 
+                // if bd update does not go right the send error
+                if (!updateResult) {
+                    // Error Updating Remote Game
+                }
             }
+            true
         }
-
-        return true
     }
 
     override fun getMyFleet(token: UUID, game_id: UUID): List<Ship> {
