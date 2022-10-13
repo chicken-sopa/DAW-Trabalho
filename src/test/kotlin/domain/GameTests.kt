@@ -6,7 +6,7 @@ import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import Result
+import ActionResult
 
 class GameTests {
 
@@ -68,8 +68,8 @@ class GameTests {
             validFleet
         )
 
-        assert(fleetLayoutResult is Result.Success)
-        assert((fleetLayoutResult as Result.Success).value.p1_fleet.isNotEmpty())
+        assert(fleetLayoutResult is ActionResult.Success)
+        assert((fleetLayoutResult as ActionResult.Success).value.p1_fleet.isNotEmpty())
     }
 
     @Test
@@ -97,8 +97,8 @@ class GameTests {
                 )
             )
 
-        assert(fleetLayoutResult is Result.Failure)
-        assert((fleetLayoutResult as Result.Failure).value is FleetLayoutError.INVALID)
+        assert(fleetLayoutResult is ActionResult.Failure)
+        assert((fleetLayoutResult as ActionResult.Failure).value is FleetLayoutError.INVALID)
     }
 
     @Test
@@ -115,7 +115,7 @@ class GameTests {
                 sutGame.submitFleetLayout(
                     Player.PLAYER1,
                     validFleet
-                ) as Result.Success
+                ) as ActionResult.Success
             ).value
         }
 
@@ -125,7 +125,7 @@ class GameTests {
                     .submitFleetLayout(
                         Player.PLAYER2,
                         validFleet
-                    ) as Result.Success
+                    ) as ActionResult.Success
             ).value
         }
 
@@ -148,7 +148,7 @@ class GameTests {
                 sutGame.submitFleetLayout(
                     Player.PLAYER1,
                     validFleet
-                ) as Result.Success
+                ) as ActionResult.Success
             ).value
         }
 
@@ -157,8 +157,8 @@ class GameTests {
             setOf()
         )
 
-        assert(fleetLayoutResult is Result.Failure)
-        assert((fleetLayoutResult as Result.Failure).value is FleetLayoutError.AlreadySubmitted)
+        assert(fleetLayoutResult is ActionResult.Failure)
+        assert((fleetLayoutResult as ActionResult.Failure).value is FleetLayoutError.AlreadySubmitted)
     }
 
     @Test
@@ -177,8 +177,8 @@ class GameTests {
         var updatedGame = sutGame
         for (shot in shots) {
             val makeShotResult = updatedGame.makeShot(Player.PLAYER1, shot)
-            assert(makeShotResult is Result.Success)
-            updatedGame = (makeShotResult as Result.Success).value
+            assert(makeShotResult is ActionResult.Success)
+            updatedGame = (makeShotResult as ActionResult.Success).value
         }
 
         assertEquals(Player.PLAYER2, updatedGame.turn)
@@ -208,8 +208,8 @@ class GameTests {
         var updatedGame = sutGame
         for (shot in shots) {
             val makeShotResult = updatedGame.makeShot(Player.PLAYER1, shot)
-            assert(makeShotResult is Result.Success)
-            updatedGame = (makeShotResult as Result.Success).value
+            assert(makeShotResult is ActionResult.Success)
+            updatedGame = (makeShotResult as ActionResult.Success).value
         }
 
         assertEquals(updatedGame.turn, Player.PLAYER2)

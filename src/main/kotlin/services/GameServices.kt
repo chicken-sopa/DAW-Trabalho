@@ -1,25 +1,32 @@
 package services
 
-import domain.Game
-import domain.Player
-import domain.Ship
-import domain.Shot
+import ActionResult
+import domain.*
 import repository.jdbi.JdbiGamesRepository
 import java.util.*
 
 class GameServices(
     private val repository: JdbiGamesRepository
 ): GameServicesInterface {
-    override fun makeShots(game_id: UUID, newShots: Set<Shot>): Game {
+    override fun makeShot(game_id: UUID, newShot: Shot): Boolean {
         val game = repository.getById(game_id)
         // require that exists a game in database
         requireNotNull(game)
 
         // updateGame and save in database
-        val updatedGame = game.makeShots(game.turn, newShots)
-        val update = repository.update(updatedGame)
+        val resultOfMakeShot = game.makeShot(game.turn, newShots)
 
-        return updatedGame
+        if(resultOfMakeShot is ActionResult.Success){
+            val updatedGame = resultOfMakeShot.value
+            val update = repository.update(updatedGame)
+
+            // if bd update does not go right the send error
+            if(!update){
+
+            }
+        }
+
+        return true
 
     }
 
@@ -34,4 +41,15 @@ class GameServices(
     override fun getCurrentTurn(game_id: UUID): Player {
         TODO("Not yet implemented")
     }
+
 }
+
+sealed class MakeShotsError{
+    object NotShootingPhase: MakeShotsError()
+    object NotYourTurn: MakeShotsError()
+    object RepeatedShot: MakeShotsError()
+}
+
+
+
+

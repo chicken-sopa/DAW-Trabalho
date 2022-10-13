@@ -1,6 +1,6 @@
 package domain
 
-import Result
+import ActionResult
 import java.sql.Timestamp
 import java.util.UUID
 
@@ -13,8 +13,8 @@ enum class Player {
     fun opponent() = if (this == PLAYER1) PLAYER2 else PLAYER1
 }
 
-typealias FleetLayoutResult = Result<FleetLayoutError, Game>
-typealias MakeShotResult = Result<RoundError, Game>
+typealias FleetLayoutResult = ActionResult<FleetLayoutError, Game>
+typealias MakeShotResult = ActionResult<RoundError, Game>
 
 sealed class FleetLayoutError {
     object NotLayoutPhase: FleetLayoutError()
@@ -95,21 +95,21 @@ data class Game(
 
     fun submitFleetLayout(me: Player, ships: Set<Ship>): FleetLayoutResult {
         if (phase != GamePhase.LAYOUT)
-            return Result.Failure(FleetLayoutError.NotLayoutPhase)
+            return ActionResult.Failure(FleetLayoutError.NotLayoutPhase)
 
         if (me == Player.PLAYER1)
             if (p1_fleet.isNotEmpty())
-                return Result.Failure(FleetLayoutError.AlreadySubmitted)
+                return ActionResult.Failure(FleetLayoutError.AlreadySubmitted)
         else
             if (p2_fleet.isNotEmpty())
-                return Result.Failure(FleetLayoutError.AlreadySubmitted)
+                return ActionResult.Failure(FleetLayoutError.AlreadySubmitted)
 
         validateFleetLayout(ships, rules.board_dimensions, rules.ships_configurations)
             .apply {
-                if (this is Result.Failure) return Result.Failure(this.value)
+                if (this is ActionResult.Failure) return ActionResult.Failure(this.value)
             }
 
-        return Result.Success(
+        return ActionResult.Success(
             if (me == Player.PLAYER1)
                 this.copy(p1_fleet = ships)
             else
@@ -118,8 +118,8 @@ data class Game(
     }
 
     fun makeShot(me: Player, shot: Shot): MakeShotResult {
-        if (phase != GamePhase.SHOOTING) return Result.Failure(RoundError.NotShootingPhase)
-        if (turn != me) return Result.Failure(RoundError.NotYourTurn)
+        if (phase != GamePhase.SHOOTING) return ActionResult.Failure(RoundError.NotShootingPhase)
+        if (turn != me) return ActionResult.Failure(RoundError.NotYourTurn)
 
         val opponentShips = if (me == Player.PLAYER1) p2_fleet else p1_fleet
         val opponentShipPartsHit = opponentShips.flatMap { ship -> ship.parts.filter { it.isHit } }
@@ -128,7 +128,7 @@ data class Game(
         if (
             myMissedShots.contains(shot) ||
             opponentShipPartsHit.any { part -> part.position.row == shot.position.row && part.position.col == shot.position.col }
-        ) return Result.Failure(RoundError.RepeatedShot)
+        ) return ActionResult.Failure(RoundError.RepeatedShot)
 
         var shotHit = false
         val newOpponentShips = opponentShips.map { ship ->
@@ -158,7 +158,7 @@ data class Game(
         val newPlayer1MissedShots = if (me == Player.PLAYER1) myMissedShots.toSet() else p1_missed_shots
         val newPlayer2MissedShots = if (me == Player.PLAYER2) myMissedShots.toSet() else p2_missed_shots
 
-        return Result.Success(
+        return ActionResult.Success(
             this.copy(
                 p1_fleet = newPlayer1Fleet,
                 p2_fleet = newPlayer2Fleet,

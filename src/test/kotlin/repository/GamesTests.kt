@@ -9,7 +9,7 @@ import repository.jdbi.utils.gson
 import utils.testWithHandleAndRollback
 import java.util.*
 
-class GamesTests {
+class GameTests {
 
     private val TEST_USER_1 = User("TEST_USER_1", "password_hash_simulation", 0, 0)
     private val TEST_USER_2 = User("TEST_USER_2", "password_hash_simulation", 0, 0)

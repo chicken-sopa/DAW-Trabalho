@@ -8,7 +8,7 @@ import java.util.*
 
 interface GameServicesInterface {
 
-    fun makeShots(game_id: UUID, newShots: Set<Shot>):Game
+    fun makeShots(game_id: UUID, newShots: Shot): Boolean
 
     fun createLayout(game_id: UUID, listOfShips: List<Ship>): Boolean
 
