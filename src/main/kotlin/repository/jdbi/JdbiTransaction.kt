@@ -9,6 +9,8 @@ class JdbiTransaction (
     private val handle: Handle
 ): Transaction {
 
+    override val systemRepository: SystemRepository by lazy { JdbiSystemRepository(handle) }
+
     override val usersRepository: UsersRepository by lazy { JdbiUsersRepository(handle) }
 
     override val gamesRepository: GamesRepository by lazy { JdbiGamesRepository(handle) }
