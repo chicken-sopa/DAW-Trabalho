@@ -10,6 +10,8 @@ interface UsersRepository {
         password_hash: String
     ): Boolean
 
+    fun updateUser(user: User): Boolean
+
     fun getUserByUsername(username: String): User?
 
     fun userExistsByUsername(username: String): Boolean

@@ -6,43 +6,37 @@ import org.junit.jupiter.api.Test
 import repository.jdbi.JdbiGamesRepository
 import repository.jdbi.JdbiUsersRepository
 import repository.jdbi.utils.gson
+import utils.testGameMode
 import utils.testWithHandleAndRollback
 import java.util.*
+import kotlin.test.assertNotNull
 
 class GameTests {
 
-    private val TEST_USER_1 = User("TEST_USER_1", "password_hash_simulation", 0, 0)
-    private val TEST_USER_2 = User("TEST_USER_2", "password_hash_simulation", 0, 0)
+    private val username1 = "TEST_USER_1"
+    private val username2 = "TEST_USER_2"
 
-    private fun prepareTestEnvironment(handle: Handle) {
+    private fun checkDBEnvironment(handle: Handle) {
         val usersRepo = JdbiUsersRepository(handle)
 
-        usersRepo.createUser(
-            TEST_USER_1.username,
-            TEST_USER_1.password_hash
-        )
-        assert(usersRepo.getUserByUsername(TEST_USER_1.username) != null)
-
-        usersRepo.createUser(
-            TEST_USER_2.username,
-            TEST_USER_2.password_hash
-        )
-        assert(usersRepo.getUserByUsername(TEST_USER_2.username) != null)
+        assertNotNull(usersRepo.getUserByUsername(username1))
+        assertNotNull(usersRepo.getUserByUsername(username2))
     }
 
     @Test
     fun `Create and retrieve game without information loss`()  {
         testWithHandleAndRollback { handle ->
 
-            prepareTestEnvironment(handle)
+            checkDBEnvironment(handle)
 
             val gamesRepository = JdbiGamesRepository(handle)
             val newGameID = UUID.randomUUID()
 
             val sutGame = Game(
                 newGameID,
-                TEST_USER_1.username,
-                TEST_USER_2.username,
+                testGameMode,
+                username1,
+                username2,
             )
             val createGameOperation = gamesRepository.create(sutGame)
             assert(createGameOperation)

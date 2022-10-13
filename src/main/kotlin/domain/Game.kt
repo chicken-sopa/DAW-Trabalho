@@ -38,25 +38,26 @@ sealed class GameResult {
 
 data class Game(
     val game_id: UUID,
+    val mode: GameMode,
 
     val p1: String,
     val p2: String,
 
-    val rules: GameRules = GameRules(),
     val p1_fleet: Set<Ship> = setOf(),
     val p2_fleet: Set<Ship> = setOf(),
 
     val p1_missed_shots: Set<Shot> = setOf(),
     val p2_missed_shots: Set<Shot> = setOf(),
 
+
     val turn: Player = Player.PLAYER1,
-    val turn_shots_counter: Int = rules.shots_per_round,
+    val turn_shots_counter: Int = mode.shots_per_round,
     // val turn: Player = Player.PLAYER1,
     val turn_deadline: Timestamp? = null,
 
     // Default value only used when game is created
     // IGNORED when GamePhase != LAYOUT
-    val layout_phase_deadline: Timestamp? = Timestamp(System.currentTimeMillis() + rules.layout_timeout_s * 1000)
+    val layout_phase_deadline: Timestamp? = Timestamp(System.currentTimeMillis() + mode.layout_timeout_s * 1000)
 ) {
     val winner: Player? =
         if (p1_fleet.isNotEmpty() && p1_fleet.all { it.isDestroyed })
@@ -77,7 +78,7 @@ data class Game(
         else
             GamePhase.SHOOTING
 
-    val final_result: GameResult? =
+    val result: GameResult? =
         if (winner != null)
             if (p1_fleet.all { it.isDestroyed } || p2_fleet.all { it.isDestroyed })
                 // One of the fleets is destroyed
@@ -104,7 +105,7 @@ data class Game(
             if (p2_fleet.isNotEmpty())
                 return ActionResult.Failure(FleetLayoutError.AlreadySubmitted)
 
-        validateFleetLayout(ships, rules.board_dimensions, rules.ships_configurations)
+        validateFleetLayout(ships, mode.board_dimensions, mode.ships_configurations)
             .apply {
                 if (this is ActionResult.Failure) return ActionResult.Failure(this.value)
             }
@@ -151,7 +152,7 @@ data class Game(
         val newPlayer1Fleet = if (me == Player.PLAYER1) p1_fleet else newOpponentShips
         val newTurnShotsCounter =
             if (turn_shots_counter - 1 == 0)
-                rules.shots_per_round
+                mode.shots_per_round
             else
                 turn_shots_counter - 1
         val newPlayer2Fleet = if (me == Player.PLAYER2) p2_fleet else newOpponentShips
@@ -165,7 +166,7 @@ data class Game(
                 p1_missed_shots = newPlayer1MissedShots,
                 p2_missed_shots = newPlayer2MissedShots,
                 turn_shots_counter = newTurnShotsCounter,
-                turn = if (newTurnShotsCounter == rules.shots_per_round) me.opponent() else me,
+                turn = if (newTurnShotsCounter == mode.shots_per_round) me.opponent() else me,
                 turn_deadline = calculateNewTurnDeadline()
             )
         )
@@ -188,7 +189,7 @@ data class Game(
 
     private fun calculateNewTurnDeadline() =
         if (phase == GamePhase.SHOOTING) {
-            Timestamp(System.currentTimeMillis() + rules.shots_timeout_s * 1000)
+            Timestamp(System.currentTimeMillis() + mode.shots_timeout_s * 1000)
         } else null
 
     private fun layoutPhaseExpired(): Boolean =
@@ -202,7 +203,7 @@ data class Game(
     fun makeShots(me: Player, shots: Set<Shot>): RoundResult {
         if (phase != GamePhase.SHOOTING) return RoundResult.NotShootingPhase
         if (turn != me) return RoundResult.NotYourTurn
-        if (shots.size != rules.shots_per_round) return RoundResult.InvalidNumberOfShots
+        if (shots.size != mode.shots_per_round) return RoundResult.InvalidNumberOfShots
 
         val opponent = me.opponent()
 

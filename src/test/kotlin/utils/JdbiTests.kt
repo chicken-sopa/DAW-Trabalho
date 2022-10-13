@@ -5,6 +5,7 @@ import org.jdbi.v3.core.Jdbi
 import org.postgresql.ds.PGSimpleDataSource
 import repository.Transaction
 import repository.TransactionManager
+import repository.jdbi.JdbiGameModesRepository
 import repository.jdbi.JdbiTransaction
 import repository.jdbi.configure
 
@@ -24,7 +25,6 @@ val jdbi = Jdbi.create(
 fun testWithHandleAndRollback(block: (Handle) -> Unit) =
     jdbi.useTransaction<Exception> { handle ->
         block(handle)
-        // handle.commit()
         handle.rollback()
     }
 
@@ -39,12 +39,15 @@ fun testWithTransactionManagerAndRollback(block: (TransactionManager) -> Unit) =
             }
         }
         block(transactionManager)
-
         handle.rollback()
     }
 
 
 // REMOVE LATER
 fun main() {
+    testWithHandleAndRollback {
+        val gamesRepo = JdbiGameModesRepository(it)
 
+        println(gamesRepo.getGameModes())
+    }
 }

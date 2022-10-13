@@ -6,20 +6,14 @@ import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import ActionResult
+import Result
+import utils.testGameMode
 
 class GameTests {
 
     private val TEST_GAME_ID = UUID.randomUUID()
 
-    private val rules = GameRules(
-        ships_configurations = listOf(
-            ShipConfiguration(1, 3),
-            ShipConfiguration(1, 2)
-        ),
-        shots_per_round = 2
-    )
-    // For the rules above
+    // For the testGameMode above
     private val validFleet = setOf(
         Ship(
             listOf(
@@ -37,6 +31,7 @@ class GameTests {
     fun `Create game and verify state`() {
         val sutGame = Game(
             TEST_GAME_ID,
+            testGameMode,
             "player1",
             "player2"
         )
@@ -52,9 +47,9 @@ class GameTests {
     fun `Submit valid fleet layout of Player1 to game`() {
         val sutGame = Game(
             TEST_GAME_ID,
+            testGameMode,
             "player1",
             "player2",
-            rules
         )
 
         assertEquals(sutGame.turn, Player.PLAYER1)
@@ -68,17 +63,17 @@ class GameTests {
             validFleet
         )
 
-        assert(fleetLayoutResult is ActionResult.Success)
-        assert((fleetLayoutResult as ActionResult.Success).value.p1_fleet.isNotEmpty())
+        assert(fleetLayoutResult is Result.Success)
+        assert((fleetLayoutResult as Result.Success).value.p1_fleet.isNotEmpty())
     }
 
     @Test
     fun `Submit invalid fleet layout of Player1 to game`() {
         val sutGame = Game(
             TEST_GAME_ID,
+            testGameMode,
             "player1",
             "player2",
-            rules
         )
 
         val fleetLayoutResult = sutGame.submitFleetLayout(
@@ -97,17 +92,17 @@ class GameTests {
                 )
             )
 
-        assert(fleetLayoutResult is ActionResult.Failure)
-        assert((fleetLayoutResult as ActionResult.Failure).value is FleetLayoutError.INVALID)
+        assert(fleetLayoutResult is Result.Failure)
+        assert((fleetLayoutResult as Result.Failure).value is FleetLayoutError.INVALID)
     }
 
     @Test
     fun `Submit valid fleet layout of Player1 and Player2 to check game phase updated`() {
         val sutGame = Game(
             TEST_GAME_ID,
+            testGameMode,
             "player1",
             "player2",
-            rules
         )
 
         val gameAfterP1FleetLayout = assertDoesNotThrow {
@@ -115,7 +110,7 @@ class GameTests {
                 sutGame.submitFleetLayout(
                     Player.PLAYER1,
                     validFleet
-                ) as ActionResult.Success
+                ) as Result.Success
             ).value
         }
 
@@ -125,7 +120,7 @@ class GameTests {
                     .submitFleetLayout(
                         Player.PLAYER2,
                         validFleet
-                    ) as ActionResult.Success
+                    ) as Result.Success
             ).value
         }
 
@@ -138,9 +133,9 @@ class GameTests {
     fun `Submit layout twice for same Player`() {
         val sutGame = Game(
             TEST_GAME_ID,
+            testGameMode,
             "player1",
             "player2",
-            rules
         )
 
         val gameAfterP1FleetLayout = assertDoesNotThrow {
@@ -148,7 +143,7 @@ class GameTests {
                 sutGame.submitFleetLayout(
                     Player.PLAYER1,
                     validFleet
-                ) as ActionResult.Success
+                ) as Result.Success
             ).value
         }
 
@@ -157,17 +152,17 @@ class GameTests {
             setOf()
         )
 
-        assert(fleetLayoutResult is ActionResult.Failure)
-        assert((fleetLayoutResult as ActionResult.Failure).value is FleetLayoutError.AlreadySubmitted)
+        assert(fleetLayoutResult is Result.Failure)
+        assert((fleetLayoutResult as Result.Failure).value is FleetLayoutError.AlreadySubmitted)
     }
 
     @Test
     fun `Make valid shots swaps turn`() {
         val sutGame = Game(
             TEST_GAME_ID,
+            testGameMode,
             "player1",
             "player2",
-            rules,
             validFleet,
             validFleet
         )
@@ -177,8 +172,8 @@ class GameTests {
         var updatedGame = sutGame
         for (shot in shots) {
             val makeShotResult = updatedGame.makeShot(Player.PLAYER1, shot)
-            assert(makeShotResult is ActionResult.Success)
-            updatedGame = (makeShotResult as ActionResult.Success).value
+            assert(makeShotResult is Result.Success)
+            updatedGame = (makeShotResult as Result.Success).value
         }
 
         assertEquals(Player.PLAYER2, updatedGame.turn)
@@ -194,9 +189,9 @@ class GameTests {
     fun `Make valid shots, some missed`() {
         val sutGame = Game(
             TEST_GAME_ID,
+            testGameMode,
             "player1",
             "player2",
-            rules,
             validFleet,
             validFleet,
             setOf(),
@@ -208,8 +203,8 @@ class GameTests {
         var updatedGame = sutGame
         for (shot in shots) {
             val makeShotResult = updatedGame.makeShot(Player.PLAYER1, shot)
-            assert(makeShotResult is ActionResult.Success)
-            updatedGame = (makeShotResult as ActionResult.Success).value
+            assert(makeShotResult is Result.Success)
+            updatedGame = (makeShotResult as Result.Success).value
         }
 
         assertEquals(updatedGame.turn, Player.PLAYER2)

@@ -14,24 +14,23 @@ class JdbiGamesRepository(
     private val handle: Handle,
 ) : GamesRepository {
 
-    override fun create(game: Game): Boolean =
+    override fun create(game: Game): Boolean {
         GameDbModel.fromGame(game).let { newGame ->
             handle.createUpdate(
                 """
                insert into games
                (
-                    game_id, p1, p2, p1_fleet, p2_fleet, p1_missed_shots, p2_missed_shots, 
-                    turn, turn_shots_counter, turn_deadline, layout_phase_deadline, 
-                    board_dimensions, ships_configuration, shots_per_round, layout_timeout_s, shot_timeout_s
+                    game_id, mode, p1, p2, p1_fleet, p2_fleet, p1_missed_shots, p2_missed_shots, 
+                    turn, turn_shots_counter, turn_deadline, layout_phase_deadline
                ) values
                (
-                    :game_id, :p1, :p2, :p1_fleet, :p2_fleet, :p1_missed_shots, :p2_missed_shots, 
-                    :turn, :turn_shots_counter, :turn_deadline, :layout_phase_deadline, 
-                    :board_dimensions, :ships_configuration, :shots_per_round, :layout_timeout_s, :shot_timeout_s
+                    :game_id, :mode, :p1, :p2, :p1_fleet, :p2_fleet, :p1_missed_shots, :p2_missed_shots, 
+                    :turn, :turn_shots_counter, :turn_deadline, :layout_phase_deadline
                )
             """
             )
                 .bind("game_id", newGame.game_id)
+                .bind("mode", newGame.mode_name)
                 .bind("p1", newGame.p1)
                 .bind("p2", newGame.p2)
                 .bind("p1_fleet", newGame.p1_fleet)
@@ -42,13 +41,9 @@ class JdbiGamesRepository(
                 .bind("turn_shots_counter", newGame.turn_shots_counter)
                 .bind("turn_deadline", newGame.turn_deadline)
                 .bind("layout_phase_deadline", newGame.layout_phase_deadline)
-                .bind("board_dimensions", newGame.board_dimensions)
-                .bind("ships_configuration", newGame.ships_configuration)
-                .bind("shots_per_round", newGame.shots_per_round)
-                .bind("layout_timeout_s", newGame.layout_timeout_s)
-                .bind("shot_timeout_s", newGame.shot_timeout_s)
                 .execute() == 1
         }
+    }
 
     override fun getById(game_id: UUID): Game? =
         handle.createQuery(
@@ -62,7 +57,7 @@ class JdbiGamesRepository(
             .singleOrNull()
             ?.toGame()
 
-    // NOTE: Can't update game rules
+    // NOTE: Can't update game mode
     override fun update(game: Game): Boolean =
         handle.createUpdate(
             """
@@ -88,6 +83,27 @@ class JdbiGamesRepository(
             .bind("turn_deadline", game.turn_deadline)
             .bind("layout_phase_deadline", game.layout_phase_deadline)
             .execute() == 1
+
+    override fun getGameModeByName(game_mode: String): GameMode? =
+        handle.createQuery(
+            """
+               select * from gamemodes 
+               where name = :name
+            """
+        )
+            .bind("name", game_mode)
+            .mapTo<GameMode>()
+            .singleOrNull()
+
+    override fun getGameModes(): List<GameMode> =
+        handle.createQuery(
+            """
+               select * from gamemodes 
+            """
+        )
+            .mapTo<GameModeDBModel>()
+            .map { it.toGameMode() }
+            .toList()
 }
 
 data class GameDbModel(
@@ -107,7 +123,8 @@ data class GameDbModel(
     val turn_deadline: Timestamp?,
     val layout_phase_deadline: Timestamp?,
 
-    // Game Rules Information
+    // Game Mode Configurations
+    val mode_name: String,
     val board_dimensions: String,
     val ships_configuration: String,
 
@@ -123,15 +140,14 @@ data class GameDbModel(
         return gson().let { gson ->
             Game(
                 game_id,
-                p1,
-                p2,
-                GameRules(
+                GameMode(
+                    name = mode_name,
                     board_dimensions = gson.fromJson(board_dimensions, BoardDimensions::class.java),
                     ships_configurations = gson.fromJson(ships_configuration, ships_configuration_list_type),
-                    shots_per_round,
-                    layout_timeout_s,
-                    shot_timeout_s
+                    shots_per_round, layout_timeout_s, shot_timeout_s
                 ),
+                p1,
+                p2,
                 p1_fleet = gson.fromJson(p1_fleet, ships_set_type),
                 p2_fleet = gson.fromJson(p2_fleet, ships_set_type),
                 p1_missed_shots = gson.fromJson(p1_missed_shots, shots_set_type),
@@ -159,11 +175,12 @@ data class GameDbModel(
                 game.turn_deadline,
                 game.layout_phase_deadline,
 
-                game.rules.board_dimensions.toJsonString(),
-                game.rules.ships_configurations.toJsonString(),
-                game.rules.shots_per_round,
-                game.rules.layout_timeout_s,
-                game.rules.shots_timeout_s
+                game.mode.name,
+                game.mode.board_dimensions.toJsonString(),
+                game.mode.ships_configurations.toJsonString(),
+                game.mode.shots_per_round,
+                game.mode.layout_timeout_s,
+                game.mode.shots_timeout_s
             )
     }
 }
