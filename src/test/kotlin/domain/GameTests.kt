@@ -7,19 +7,13 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import Result
+import utils.testGameMode
 
 class GameTests {
 
     private val TEST_GAME_ID = UUID.randomUUID()
 
-    private val rules = GameRules(
-        ships_configurations = listOf(
-            ShipConfiguration(1, 3),
-            ShipConfiguration(1, 2)
-        ),
-        shots_per_round = 2
-    )
-    // For the rules above
+    // For the testGameMode above
     private val validFleet = setOf(
         Ship(
             listOf(
@@ -37,6 +31,7 @@ class GameTests {
     fun `Create game and verify state`() {
         val sutGame = Game(
             TEST_GAME_ID,
+            testGameMode,
             "player1",
             "player2"
         )
@@ -52,9 +47,9 @@ class GameTests {
     fun `Submit valid fleet layout of Player1 to game`() {
         val sutGame = Game(
             TEST_GAME_ID,
+            testGameMode,
             "player1",
             "player2",
-            rules
         )
 
         assertEquals(sutGame.turn, Player.PLAYER1)
@@ -76,9 +71,9 @@ class GameTests {
     fun `Submit invalid fleet layout of Player1 to game`() {
         val sutGame = Game(
             TEST_GAME_ID,
+            testGameMode,
             "player1",
             "player2",
-            rules
         )
 
         val fleetLayoutResult = sutGame.submitFleetLayout(
@@ -105,9 +100,9 @@ class GameTests {
     fun `Submit valid fleet layout of Player1 and Player2 to check game phase updated`() {
         val sutGame = Game(
             TEST_GAME_ID,
+            testGameMode,
             "player1",
             "player2",
-            rules
         )
 
         val gameAfterP1FleetLayout = assertDoesNotThrow {
@@ -138,9 +133,9 @@ class GameTests {
     fun `Submit layout twice for same Player`() {
         val sutGame = Game(
             TEST_GAME_ID,
+            testGameMode,
             "player1",
             "player2",
-            rules
         )
 
         val gameAfterP1FleetLayout = assertDoesNotThrow {
@@ -165,9 +160,9 @@ class GameTests {
     fun `Make valid shots swaps turn`() {
         val sutGame = Game(
             TEST_GAME_ID,
+            testGameMode,
             "player1",
             "player2",
-            rules,
             validFleet,
             validFleet
         )
@@ -194,9 +189,9 @@ class GameTests {
     fun `Make valid shots, some missed`() {
         val sutGame = Game(
             TEST_GAME_ID,
+            testGameMode,
             "player1",
             "player2",
-            rules,
             validFleet,
             validFleet,
             setOf(),

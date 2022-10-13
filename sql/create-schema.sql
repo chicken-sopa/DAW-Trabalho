@@ -14,10 +14,7 @@ create type Ship as (is_destroyed boolean, parts ShipPart[]);
 
 -- Create Tables
 create table if not exists users (
-	username varchar(15) primary key
-	check (
-		length(username) >= 3
-	),
+	username varchar(15) primary key,
 
 	password_hash varchar not null,
 
@@ -36,9 +33,22 @@ create table if not exists tokens (
 	primary key (token_value, username)
 );
 
+create table if not exists gamemodes(
+	name varchar not null primary key,
+
+	board_dimensions varchar not null,
+    ships_configuration varchar not null,
+
+    shots_per_round int not null,
+    layout_timeout_s int not null,
+    shots_timeout_s int not null
+);
+
 create table if not exists games(
 	game_id uuid primary key,
 
+	mode varchar not null,
+	
 	p1 varchar not null,
 	p2 varchar not null,
 
@@ -54,13 +64,7 @@ create table if not exists games(
 	turn_deadline timestamp,
 	layout_phase_deadline timestamp,
 	
-	board_dimensions varchar not null,
-    ships_configuration varchar not null,
-    
-    shots_per_round int not null,
-    layout_timeout_s int not null,
-    shot_timeout_s int not null,
-	
+	constraint fk_gamemode foreign key(mode) references gamemodes(name) on delete cascade,
 	constraint fk_player1 foreign key(p1) references users(username) on delete cascade,
 	constraint fk_player2 foreign key(p2) references users(username) on delete cascade
 );

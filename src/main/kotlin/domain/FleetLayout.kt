@@ -23,12 +23,12 @@ fun validateFleetLayout(
     // Make sure all ships match the allowedShipConfigurations
     allowedShipConfigurations.forEach { shipConfig ->
         if (shipConfig.quantity != fleet.count { ship -> ship.parts.size == shipConfig.ship_size })
-            throw Exception("error on validate ships need to specify")
+            return Result.Failure(FleetLayoutError.INVALID)
     }
 
     // TODO
     // ship parts do not collide
     // ship parts are in sequence
-    // <= 1 square spacing among ships
+    // <= 1 square spacing among ships (each cell protected from every ship)
     return Result.Success(Unit)
 }

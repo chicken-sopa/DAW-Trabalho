@@ -22,6 +22,22 @@ class JdbiUsersRepository (
             .bind("password", password_hash)
             .execute() == 1
 
+    override fun updateUser(user: User): Boolean =
+        handle.createUpdate(
+            """
+               update users set
+               password_hash = :password_hash, 
+               games_played = :games_played, games_won = :games_won, ranking_points = :ranking_points
+               
+               where username = :username
+            """
+        )
+            .bind("password_hash", user.password_hash)
+            .bind("games_played", user.games_played)
+            .bind("games_won", user.games_won)
+            .bind("ranking_points", user.ranking_points)
+            .execute() == 1
+
     override fun getUserByUsername(username: String): User? =
         handle.createQuery(
             """

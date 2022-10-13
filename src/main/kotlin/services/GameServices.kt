@@ -11,7 +11,7 @@ class GameServices(
     private val repository: JdbiGamesRepository
 ): GameServicesInterface {
     override fun makeShots(game_id: UUID, newShots: Set<Shot>): Game {
-        val game = repository.getById(game_id)
+        /*val game = repository.getById(game_id)
         // require that exists a game in database
         requireNotNull(game)
 
@@ -19,7 +19,8 @@ class GameServices(
         val updatedGame = game.makeShots(game.turn, newShots)
         val update = repository.update(updatedGame)
 
-        return updatedGame
+        return updatedGame*/
+        TODO()
 
     }
 
