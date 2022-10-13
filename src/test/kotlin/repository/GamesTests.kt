@@ -1,6 +1,6 @@
 package repository
 
-import domain.*
+import domain.game.Game
 import org.jdbi.v3.core.Handle
 import org.junit.jupiter.api.Test
 import repository.jdbi.JdbiGamesRepository
@@ -42,6 +42,9 @@ class GamesTests {
             assert(createGameOperation)
 
             val remoteGame = gamesRepository.getById(newGameID)
+
+            println(remoteGame)
+            println(sutGame)
 
             assert(remoteGame == sutGame)
             // Compare the json contents as well

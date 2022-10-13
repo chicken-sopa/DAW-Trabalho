@@ -1,6 +1,6 @@
 package repository.jdbi
 
-import domain.*
+import domain.game.*
 import repository.GamesRepository
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
@@ -14,7 +14,7 @@ class JdbiGamesRepository(
     private val handle: Handle,
 ) : GamesRepository {
 
-    override fun create(game: Game): Boolean {
+    override fun create(game: Game): Boolean =
         GameDbModel.fromGame(game).let { newGame ->
             handle.createUpdate(
                 """
@@ -43,13 +43,14 @@ class JdbiGamesRepository(
                 .bind("layout_phase_deadline", newGame.layout_phase_deadline)
                 .execute() == 1
         }
-    }
 
     override fun getById(game_id: UUID): Game? =
         handle.createQuery(
             """
-               select * from games where
-               game_id = :game_id
+               select * from 
+               games g, gamemodes gm
+               where
+               g.mode = gm.mode_name and g.game_id = :game_id
             """
         )
             .bind("game_id", game_id)
@@ -83,27 +84,6 @@ class JdbiGamesRepository(
             .bind("turn_deadline", game.turn_deadline)
             .bind("layout_phase_deadline", game.layout_phase_deadline)
             .execute() == 1
-
-    override fun getGameModeByName(game_mode: String): GameMode? =
-        handle.createQuery(
-            """
-               select * from gamemodes 
-               where name = :name
-            """
-        )
-            .bind("name", game_mode)
-            .mapTo<GameMode>()
-            .singleOrNull()
-
-    override fun getGameModes(): List<GameMode> =
-        handle.createQuery(
-            """
-               select * from gamemodes 
-            """
-        )
-            .mapTo<GameModeDBModel>()
-            .map { it.toGameMode() }
-            .toList()
 }
 
 data class GameDbModel(
@@ -130,7 +110,7 @@ data class GameDbModel(
 
     val shots_per_round: Int,
     val layout_timeout_s: Int,
-    val shot_timeout_s: Int
+    val shots_timeout_s: Int
 ) {
     fun toGame(): Game {
         val ships_configuration_list_type = object : TypeToken<List<ShipConfiguration>>() {}.type
@@ -141,10 +121,10 @@ data class GameDbModel(
             Game(
                 game_id,
                 GameMode(
-                    name = mode_name,
+                    mode_name = mode_name,
                     board_dimensions = gson.fromJson(board_dimensions, BoardDimensions::class.java),
                     ships_configurations = gson.fromJson(ships_configuration, ships_configuration_list_type),
-                    shots_per_round, layout_timeout_s, shot_timeout_s
+                    shots_per_round, layout_timeout_s, shots_timeout_s
                 ),
                 p1,
                 p2,
@@ -175,7 +155,7 @@ data class GameDbModel(
                 game.turn_deadline,
                 game.layout_phase_deadline,
 
-                game.mode.name,
+                game.mode.mode_name,
                 game.mode.board_dimensions.toJsonString(),
                 game.mode.ships_configurations.toJsonString(),
                 game.mode.shots_per_round,

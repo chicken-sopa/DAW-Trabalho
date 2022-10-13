@@ -1,7 +1,9 @@
 package repository
 
-import domain.GameMode
+import domain.game.GameMode
 
 interface GameModesRepository {
     fun getGameModes(): List<GameMode>
+
+    fun getGameModeByName(game_mode: String): GameMode?
 }

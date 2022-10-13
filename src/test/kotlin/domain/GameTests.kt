@@ -7,6 +7,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import Result
+import domain.game.*
 import utils.testGameMode
 
 class GameTests {
@@ -58,7 +59,7 @@ class GameTests {
         assertEquals(sutGame.phase, GamePhase.LAYOUT)
         assertNull(sutGame.winner)
 
-        val fleetLayoutResult = sutGame.submitFleetLayout(
+        val fleetLayoutResult = sutGame.submitFleet(
             Player.PLAYER1,
             validFleet
         )
@@ -76,7 +77,7 @@ class GameTests {
             "player2",
         )
 
-        val fleetLayoutResult = sutGame.submitFleetLayout(
+        val fleetLayoutResult = sutGame.submitFleet(
                 Player.PLAYER1,
                 setOf(
                     Ship(
@@ -93,7 +94,7 @@ class GameTests {
             )
 
         assert(fleetLayoutResult is Result.Failure)
-        assert((fleetLayoutResult as Result.Failure).value is FleetLayoutError.INVALID)
+        assert((fleetLayoutResult as Result.Failure).value is FleetError.INVALID)
     }
 
     @Test
@@ -107,7 +108,7 @@ class GameTests {
 
         val gameAfterP1FleetLayout = assertDoesNotThrow {
             (
-                sutGame.submitFleetLayout(
+                sutGame.submitFleet(
                     Player.PLAYER1,
                     validFleet
                 ) as Result.Success
@@ -117,7 +118,7 @@ class GameTests {
         val updatedGame = assertDoesNotThrow {
             (
                 gameAfterP1FleetLayout
-                    .submitFleetLayout(
+                    .submitFleet(
                         Player.PLAYER2,
                         validFleet
                     ) as Result.Success
@@ -140,20 +141,20 @@ class GameTests {
 
         val gameAfterP1FleetLayout = assertDoesNotThrow {
             (
-                sutGame.submitFleetLayout(
+                sutGame.submitFleet(
                     Player.PLAYER1,
                     validFleet
                 ) as Result.Success
             ).value
         }
 
-        val fleetLayoutResult = gameAfterP1FleetLayout.submitFleetLayout(
+        val fleetLayoutResult = gameAfterP1FleetLayout.submitFleet(
             Player.PLAYER1,
             setOf()
         )
 
         assert(fleetLayoutResult is Result.Failure)
-        assert((fleetLayoutResult as Result.Failure).value is FleetLayoutError.AlreadySubmitted)
+        assert((fleetLayoutResult as Result.Failure).value is FleetError.AlreadySubmitted)
     }
 
     @Test

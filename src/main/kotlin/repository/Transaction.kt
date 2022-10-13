@@ -2,6 +2,7 @@ package repository
 
 interface Transaction {
 
+    val systemRepository: SystemRepository
     val usersRepository: UsersRepository
     val gamesRepository: GamesRepository
 

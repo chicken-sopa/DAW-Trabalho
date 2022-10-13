@@ -1,4 +1,4 @@
-package domain
+package domain.game
 
 data class ShipPart(val position: Position, val isHit: Boolean = false)
 
@@ -27,7 +27,7 @@ data class Ship(
     }
 }
 
-data class PartialShip(
+data class OpponentShip(
     val hitParts: List<ShipPart>,
     val isDestroyed: Boolean = false
 )

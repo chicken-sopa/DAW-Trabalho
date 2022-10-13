@@ -1,4 +1,4 @@
-package domain
+package domain.game
 
 import Result
 import java.sql.Timestamp
@@ -13,14 +13,14 @@ enum class Player {
     fun opponent() = if (this == PLAYER1) PLAYER2 else PLAYER1
 }
 
-typealias FleetLayoutResult = Result<FleetLayoutError, Game>
+typealias SubmitFleetResult = Result<FleetError, Game>
 typealias MakeShotResult = Result<RoundError, Game>
 
-sealed class FleetLayoutError {
-    object NotLayoutPhase: FleetLayoutError()
-    object AlreadySubmitted: FleetLayoutError()
+sealed class FleetError {
+    object NotPhase: FleetError()
+    object AlreadySubmitted: FleetError()
     // Replace Later with more specific errors
-    object INVALID: FleetLayoutError()
+    object INVALID: FleetError()
 }
 
 sealed class RoundError {
@@ -48,7 +48,6 @@ data class Game(
 
     val p1_missed_shots: Set<Shot> = setOf(),
     val p2_missed_shots: Set<Shot> = setOf(),
-
 
     val turn: Player = Player.PLAYER1,
     val turn_shots_counter: Int = mode.shots_per_round,
@@ -94,16 +93,16 @@ data class Game(
             else
                 null
 
-    fun submitFleetLayout(me: Player, ships: Set<Ship>): FleetLayoutResult {
+    fun submitFleet(me: Player, ships: Set<Ship>): SubmitFleetResult {
         if (phase != GamePhase.LAYOUT)
-            return Result.Failure(FleetLayoutError.NotLayoutPhase)
+            return Result.Failure(FleetError.NotPhase)
 
         if (me == Player.PLAYER1)
             if (p1_fleet.isNotEmpty())
-                return Result.Failure(FleetLayoutError.AlreadySubmitted)
+                return Result.Failure(FleetError.AlreadySubmitted)
         else
             if (p2_fleet.isNotEmpty())
-                return Result.Failure(FleetLayoutError.AlreadySubmitted)
+                return Result.Failure(FleetError.AlreadySubmitted)
 
         validateFleetLayout(ships, mode.board_dimensions, mode.ships_configurations)
             .apply {

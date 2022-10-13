@@ -1,8 +1,8 @@
 package repository.jdbi
 
-import domain.BoardDimensions
-import domain.GameMode
-import domain.ShipConfiguration
+import domain.game.BoardDimensions
+import domain.game.GameMode
+import domain.game.ShipConfiguration
 import io.leangen.geantyref.TypeToken
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
@@ -22,10 +22,22 @@ class JdbiGameModesRepository(
             .mapTo<GameModeDBModel>()
             .map { it.toGameMode() }
             .toList()
+
+    override fun getGameModeByName(game_mode: String): GameMode? =
+        handle.createQuery(
+            """
+               select * from gamemodes
+               where mode_name = :mode_name
+            """
+        )
+            .bind("mode_name", game_mode)
+            .mapTo<GameModeDBModel>()
+            .singleOrNull()
+            ?.toGameMode()
 }
 
 data class GameModeDBModel(
-    val name: String,
+    val mode_name: String,
     val board_dimensions: String,
     val ships_configuration: String,
     val shots_per_round: Int,
@@ -37,7 +49,7 @@ data class GameModeDBModel(
             val ships_configuration_list_type = object : TypeToken<List<ShipConfiguration>>() {}.type
 
             GameMode(
-                name,
+                mode_name,
                 gson.fromJson(board_dimensions, BoardDimensions::class.java),
                 gson.fromJson(ships_configuration, ships_configuration_list_type),
                 shots_per_round,
@@ -49,7 +61,7 @@ data class GameModeDBModel(
     companion object {
         fun fromGameMode(gameMode: GameMode) =
             GameModeDBModel(
-                gameMode.name,
+                gameMode.mode_name,
                 gameMode.board_dimensions.toJsonString(),
                 gameMode.ships_configurations.toJsonString(),
                 gameMode.shots_per_round,

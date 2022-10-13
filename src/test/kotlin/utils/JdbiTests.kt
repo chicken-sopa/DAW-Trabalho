@@ -48,6 +48,8 @@ fun main() {
     testWithHandleAndRollback {
         val gamesRepo = JdbiGameModesRepository(it)
 
-        println(gamesRepo.getGameModes())
+        val gameModes = gamesRepo.getGameModes()
+        val testGameMode = gamesRepo.getGameModeByName("Some Unexisting mode")
+        println(testGameMode)
     }
 }

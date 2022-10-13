@@ -1,17 +1,22 @@
 package services
 
-import domain.Game
-import domain.Player
-import domain.Ship
-import domain.Shot
+import domain.game.*
+import repository.TransactionManager
 import repository.jdbi.JdbiGamesRepository
+import services.interfaces.IGameServices
 import java.util.*
 
 class GameServices(
-    private val repository: JdbiGamesRepository
-): GameServicesInterface {
-    override fun makeShots(game_id: UUID, newShots: Set<Shot>): Game {
-        /*val game = repository.getById(game_id)
+    private val transactionManager: TransactionManager
+): IGameServices {
+
+    override fun submitFleet(token: UUID, game_id: UUID, fleet: List<Ship>): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun makeShot(token: UUID, game_id: UUID, shot: Shot): Game {
+        /*
+        val game = repository.getById(game_id)
         // require that exists a game in database
         requireNotNull(game)
 
@@ -19,20 +24,20 @@ class GameServices(
         val updatedGame = game.makeShots(game.turn, newShots)
         val update = repository.update(updatedGame)
 
-        return updatedGame*/
+        return updatedGame
+        */
         TODO()
-
     }
 
-    override fun createLayout(game_id: UUID, listOfShips: List<Ship>): Boolean {
+    override fun getMyFleet(token: UUID, game_id: UUID): List<Ship> {
         TODO("Not yet implemented")
     }
 
-    override fun getGame(game_id: UUID): Game {
+    override fun getOpponentFleet(token: UUID, game_id: UUID): List<OpponentShip> {
         TODO("Not yet implemented")
     }
 
-    override fun getCurrentTurn(game_id: UUID): Player {
+    override fun getGame(token: UUID, game_id: UUID): Game {
         TODO("Not yet implemented")
     }
 }

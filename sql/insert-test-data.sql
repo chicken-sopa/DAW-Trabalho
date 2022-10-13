@@ -34,5 +34,20 @@ insert into gamemodes values
 	    }
   	 ]',
   	 1, 80, 15
+),
+(
+	'Test Mode',
+	'{"rows_num": 7, "cols_num": 7}',
+	'[
+	    {
+	      "quantity": 1,
+	      "ship_size": 3
+	    },
+		{
+	      "quantity": 1,
+	      "ship_size": 2
+	    }
+  	 ]',
+  	 2, 90, 40
 )
 ;

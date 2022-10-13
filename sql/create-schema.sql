@@ -34,7 +34,7 @@ create table if not exists tokens (
 );
 
 create table if not exists gamemodes(
-	name varchar not null primary key,
+	mode_name varchar not null primary key,
 
 	board_dimensions varchar not null,
     ships_configuration varchar not null,
@@ -64,7 +64,7 @@ create table if not exists games(
 	turn_deadline timestamp,
 	layout_phase_deadline timestamp,
 	
-	constraint fk_gamemode foreign key(mode) references gamemodes(name) on delete cascade,
+	constraint fk_gamemode foreign key(mode) references gamemodes(mode_name) on delete cascade,
 	constraint fk_player1 foreign key(p1) references users(username) on delete cascade,
 	constraint fk_player2 foreign key(p2) references users(username) on delete cascade
 );
