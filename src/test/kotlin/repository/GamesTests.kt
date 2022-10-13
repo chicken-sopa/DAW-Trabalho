@@ -11,7 +11,7 @@ import utils.testWithHandleAndRollback
 import java.util.*
 import kotlin.test.assertNotNull
 
-class GamesTests {
+class GameTests {
 
     private val username1 = "TEST_USER_1"
     private val username2 = "TEST_USER_2"

@@ -1,4 +1,4 @@
-package domain.game
+package domain
 
 import Result
 import java.sql.Timestamp
