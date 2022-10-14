@@ -6,10 +6,7 @@ import java.util.UUID
 
 interface UsersRepository {
 
-    fun createUser(
-        username: String,
-        password_hash: String
-    ): Boolean
+    fun createUser(user: User): Boolean
 
     fun updateUser(user: User): Boolean
 

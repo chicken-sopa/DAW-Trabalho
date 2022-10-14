@@ -75,3 +75,16 @@ create or replace view ranking as
 	select ranking_points from users
 	order by ranking_points desc
 );
+
+create table if not exists matchmakingRequest(
+    searching_time timestamp,
+    p1 varchar unique not null,
+    p2 varchar,
+    mode varchar not null,
+    game_id uuid,
+
+    constraint fk_gamemode foreign key(mode) references gamemodes(mode_name) on delete cascade,
+    constraint fk_player1 foreign key(p1) references users(username) on delete cascade,
+    constraint fk_player2 foreign key(p2) references users(username) on delete cascade,
+    constraint fk_game foreign key(game_id) references games(game_id) on delete cascade
+);
