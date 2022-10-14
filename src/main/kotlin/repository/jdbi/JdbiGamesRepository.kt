@@ -1,7 +1,7 @@
 package repository.jdbi
 
 import domain.game.*
-import repository.GamesRepository
+import repository.interfaces.GamesRepository
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
 import repository.jdbi.utils.gson

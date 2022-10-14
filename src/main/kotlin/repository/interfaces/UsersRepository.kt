@@ -1,6 +1,7 @@
-package repository
+package repository.interfaces
 
 import domain.User
+import domain.UserRanking
 import java.util.UUID
 
 interface UsersRepository {
@@ -16,9 +17,8 @@ interface UsersRepository {
 
     fun userExistsByUsername(username: String): Boolean
 
+
     fun getUserByToken(token: UUID): User?
 
     fun createToken(token: UUID, username: String): Boolean
-
-    fun getUserRankingPointsByUsername(username: String): Int?
 }

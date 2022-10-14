@@ -1,4 +1,4 @@
-package repository
+package repository.interfaces
 
 import domain.game.Game
 import java.util.*

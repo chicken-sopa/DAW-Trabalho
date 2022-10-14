@@ -2,8 +2,10 @@ package repository.jdbi
 
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
-import org.postgresql.ds.PGSimpleDataSource
 import repository.*
+import repository.interfaces.GamesRepository
+import repository.interfaces.SystemRepository
+import repository.interfaces.UsersRepository
 
 class JdbiTransaction (
     private val handle: Handle

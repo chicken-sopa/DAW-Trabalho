@@ -2,7 +2,7 @@ package repository.jdbi
 
 import domain.SystemInfo
 import org.jdbi.v3.core.Handle
-import repository.SystemRepository
+import repository.interfaces.SystemRepository
 
 class JdbiSystemRepository(
     val handle: Handle

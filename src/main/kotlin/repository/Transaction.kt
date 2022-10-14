@@ -1,5 +1,9 @@
 package repository
 
+import repository.interfaces.GamesRepository
+import repository.interfaces.SystemRepository
+import repository.interfaces.UsersRepository
+
 interface Transaction {
 
     val systemRepository: SystemRepository

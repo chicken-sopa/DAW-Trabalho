@@ -10,11 +10,11 @@ class GameServices(
     private val transactionManager: TransactionManager
 ): IGameServices {
 
-    override fun submitFleet(token: UUID, game_id: UUID, fleet: List<Ship>): Boolean {
+    override fun submitFleet(username: String, game_id: UUID, fleet: List<Ship>): Boolean {
         TODO("Not yet implemented")
     }
 
-    override fun makeShot(token: UUID, game_id: UUID, shot: Shot): Boolean {
+    override fun makeShot(username: String, game_id: UUID, shot: Shot): Boolean {
         return transactionManager.run {
             val gamesRepo = it.gamesRepository
             val game = gamesRepo.getById(game_id)
@@ -41,15 +41,15 @@ class GameServices(
         }
     }
 
-    override fun getMyFleet(token: UUID, game_id: UUID): List<Ship> {
+    override fun getMyFleet(username: String, game_id: UUID): List<Ship> {
         TODO("Not yet implemented")
     }
 
-    override fun getOpponentFleet(token: UUID, game_id: UUID): List<OpponentShip> {
+    override fun getOpponentFleet(username: String, game_id: UUID): List<OpponentShip> {
         TODO("Not yet implemented")
     }
 
-    override fun getGame(token: UUID, game_id: UUID): Game {
+    override fun getGame(username: String, game_id: UUID): Game {
         TODO("Not yet implemented")
     }
 

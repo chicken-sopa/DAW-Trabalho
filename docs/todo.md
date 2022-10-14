@@ -7,18 +7,12 @@
   - Services (with Games?)
 - Implementation
 - API Interfaces + Implementation
-- Re-do API docs:
-  - Remove unneded responses like 401
-  - Tell which requests need authentication
-  - Change status codes for game
-  - Game has extra response header etag
-  - Game has extra request header If-None-Match: <etag>
 - Logging
 - Testing Domain
 - Testing Repository
 
 
-### Matchmaking Idea 
+### Matchmaking Idea
 1. User makes request
 2. Server tries to find a suitable game (from DB) (ranking points close enough)
 3. If Found:

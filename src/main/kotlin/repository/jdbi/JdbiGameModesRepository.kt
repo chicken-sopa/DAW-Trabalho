@@ -6,7 +6,7 @@ import domain.game.ShipConfiguration
 import io.leangen.geantyref.TypeToken
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
-import repository.GameModesRepository
+import repository.interfaces.GameModesRepository
 import repository.jdbi.utils.gson
 import repository.jdbi.utils.toJsonString
 
@@ -59,7 +59,7 @@ data class GameModeDBModel(
         }
 
     companion object {
-        fun fromGameMode(gameMode: GameMode) =
+        fun fromGameMode(gameMode: GameMode): GameModeDBModel =
             GameModeDBModel(
                 gameMode.mode_name,
                 gameMode.board_dimensions.toJsonString(),

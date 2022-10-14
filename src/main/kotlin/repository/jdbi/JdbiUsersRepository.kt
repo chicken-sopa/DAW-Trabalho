@@ -3,8 +3,7 @@ package repository.jdbi
 import domain.User
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
-import org.springframework.stereotype.Repository
-import repository.UsersRepository
+import repository.interfaces.UsersRepository
 import java.util.*
 
 class JdbiUsersRepository (
