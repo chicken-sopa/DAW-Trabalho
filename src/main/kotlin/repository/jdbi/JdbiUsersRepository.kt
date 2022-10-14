@@ -10,17 +10,15 @@ class JdbiUsersRepository (
     private val handle: Handle
 ): UsersRepository {
 
-    override fun createUser(username: String, password_hash: String): Boolean =
+    override fun createUser(user: User): Boolean =
         handle.createUpdate(
             """
-               insert into users
-               (username, password_hash)
-               values
+               insert into users(username, password_hash) values
                (:username, :password)
             """
         )
-            .bind("username", username)
-            .bind("password", password_hash)
+            .bind("username", user.username)
+            .bind("password", user.password_hash)
             .execute() == 1
 
     override fun updateUser(user: User): Boolean =
@@ -81,4 +79,5 @@ class JdbiUsersRepository (
             .bind("token", token)
             .bind("username", username)
             .execute() == 1
+
 }

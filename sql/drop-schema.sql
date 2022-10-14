@@ -6,6 +6,7 @@ drop table if exists gamemodes;
 drop view if exists ranking;
 drop table if exists tokens;
 drop table if exists users;
+drop table if exists matchmakingRequest;
 
 -- Drop Types
 drop type if exists Ship;
