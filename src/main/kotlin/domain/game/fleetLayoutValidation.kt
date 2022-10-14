@@ -4,10 +4,6 @@ import Result
 
 typealias FleetLayoutValidation = Result<FleetError, Unit>
 
-/**
- * Just an idea
- * TODO: Make every ERROR sealed class have a "detail" field + inherit Throwable (maybe)
- * */
 fun validateFleetLayout(
     fleet: Set<Ship>,
     boardDimensions: BoardDimensions,
@@ -16,32 +12,24 @@ fun validateFleetLayout(
     // Make sure all ships match the allowedShipConfigurations
     allowedShipConfigurations.forEach { shipConfig ->
         if (shipConfig.quantity != fleet.count { ship -> ship.parts.size == shipConfig.ship_size })
-            throw Exception("Ships not according to ships configuration")
+            return Result.Failure(FleetError.InvalidShipsConfiguration())
     }
 
-    // Make sure no ship part is out of board
+    // Make sure no ship part is out of bounds
     fleet.forEach { ship ->
         ship.parts.forEach{shipPart->
             if (shipPart.position.col !in 0 until boardDimensions.cols_num)
-                throw Exception("Ship part out of bounds")
+                return Result.Failure(FleetError.ShipPartOutOfBounds())
 
             if (shipPart.position.row !in 0 until boardDimensions.rows_num)
-                throw Exception("Ship part out of bounds")
+                return Result.Failure(FleetError.ShipPartOutOfBounds())
         }
     }
 
-    fleet.forEach { currShip ->
-        // Make sure ships don't have repeated parts (same coordinates inside EACH ship)
-        if (currShip.parts.toSet().size != currShip.parts.size)
-            throw Exception("Ship parts of a ship are repeated")
-
-        // Make sure ships don't have repeated parts (same coordinates among ALL)
-        val otherShipsParts = fleet.filterNot { it === currShip }.flatMap { it.parts }
-        currShip.parts.forEach { shipPart ->
-            if (otherShipsParts.find { it == shipPart } != null)
-                throw Exception("One or more ships have parts with the same coordinates")
-        }
-    }
+    // Make sure ships don't have repeated parts (same coordinates)
+    val allShipParts = fleet.flatMap { it.parts }
+    if (allShipParts.size != allShipParts.toSet().size)
+        return Result.Failure(FleetError.ShipPartsWithSameCoordinates())
 
     // Check ships alignment
     fleet.forEach { ship ->
@@ -53,7 +41,7 @@ fun validateFleetLayout(
                 // OR HORIZONTAL
                 ship.parts.all { part -> part.position.row == ship.parts.first().position.row }
             )
-        ) throw Exception("One or more ships are not properly aligned (Not vertical neither horizontal)")
+        ) return Result.Failure(FleetError.BadShipAlignment())
     }
 
     /*
@@ -78,33 +66,45 @@ fun validateFleetLayout(
             }
 
         if (numberOfTimesDoesNotHaveNextPart != 1)
-            throw Exception("Ship parts are not in sequence")
+            return Result.Failure(FleetError.ShipNotInSequence())
     }
 
 
+    // NOT WORKING
     // Check ships distance from each other
     fleet.forEach { ship ->
-       ship.parts.forEach { shipPart ->
+       ship.parts.map { it.position }.forEach { partPos ->
            fleet
                .filterNot { it === ship }
-               .forEach { secondShip ->
+               .forEach { otherShip ->
                    if (
-                       secondShip.parts.any { secondShipPart ->
-                           secondShipPart.position.col == shipPart.position.col.inc() ||
-                           secondShipPart.position.col == shipPart.position.col.dec() ||
-                           secondShipPart.position.row == shipPart.position.row.inc() ||
-                           secondShipPart.position.row == shipPart.position.row.dec()
+                       otherShip.parts.map { it.position }.any {
+                           // Top + Bottom
+                           (it.col == partPos.col - 1 && it.row == partPos.row) ||
+                           (it.col == partPos.col + 1 && it.row == partPos.row) ||
+                           // Left + Right (same level)
+                           (it.col == partPos.col && it.row == partPos.row - 1) ||
+                           (it.col == partPos.col && it.row == partPos.row + 1) ||
+                           // Diagonals
+                           // Top Left
+                           (it.col - 1 == partPos.col && it.row - 1 == partPos.row) ||
+                           // Bottom Left
+                           (it.col + 1 == partPos.col && it.row - 1 == partPos.row) ||
+                           // Top Right
+                           (it.col - 1 == partPos.col && it.row + 1 == partPos.row) ||
+                           // Bottom Right
+                           (it.col + 1 == partPos.col && it.row + 1 == partPos.row)
                         }
                    )
-                       throw Exception("Not all ships have at least 1 cell of spacing among them")
+                       return Result.Failure(FleetError.ShipsNotSpaced())
                 }
        }
-
     }
 
     return Result.Success(Unit)
 }
 
+// FOR QUICKER TESTING PURPOSES
 fun main(){
     val shipConfig: List<ShipConfiguration> = listOf(
         ShipConfiguration(2, 3)
@@ -121,5 +121,4 @@ fun main(){
         ),
         bd, shipConfig
     ))
-
 }

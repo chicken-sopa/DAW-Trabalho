@@ -1,7 +1,6 @@
 package repository.jdbi
 
 import domain.game.*
-import repository.interfaces.GamesRepository
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
 import repository.jdbi.utils.gson
@@ -9,6 +8,7 @@ import repository.jdbi.utils.toJsonString
 import java.sql.Timestamp
 import java.util.*
 import io.leangen.geantyref.TypeToken
+import repository.interfaces.GamesRepository
 
 class JdbiGamesRepository(
     private val handle: Handle,

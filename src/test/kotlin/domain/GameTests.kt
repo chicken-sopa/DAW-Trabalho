@@ -23,7 +23,7 @@ class GameTests {
         ),
         Ship(
             listOf(
-                ShipPart(Position(2, 3)), ShipPart(Position(3, 3))
+                ShipPart(Position(3, 3)), ShipPart(Position(3, 4))
             )
         )
     )
@@ -64,6 +64,8 @@ class GameTests {
             validFleet
         )
 
+        println(fleetLayoutResult)
+
         assert(fleetLayoutResult is Result.Success)
         assert((fleetLayoutResult as Result.Success).value.p1_fleet.isNotEmpty())
     }
@@ -94,7 +96,7 @@ class GameTests {
             )
 
         assert(fleetLayoutResult is Result.Failure)
-        assert((fleetLayoutResult as Result.Failure).value is FleetError.INVALID)
+        assert((fleetLayoutResult as Result.Failure).value is FleetError.InvalidShipsConfiguration)
     }
 
     @Test

@@ -1,9 +1,7 @@
 package services.interfaces
 
-import domain.game.Game
-import domain.game.OpponentShip
-import domain.game.Ship
-import domain.game.Shot
+import domain.game.*
+import java.sql.Timestamp
 import java.util.*
 
 interface IGameServices {
@@ -21,5 +19,13 @@ interface IGameServices {
     fun getOpponentFleet(username: String, game_id: UUID): List<OpponentShip>
 
     // Inform the user about the overall state of a game, namely: game phase (layout definition phase, shooting phase, completed phase).
-    fun getGame(username: String, game_id: UUID): Game // TODO: Needs to be a different game with less information
+    fun getGame(username: String, game_id: UUID): LimitedGame // TODO: Needs to be a different game with less information
+
+    /**
+     * Forfeit from Game
+     * returns
+     *  true if could forfeit
+     *  false if could not forfeit (Ex: game already over)
+     * */
+    fun forfeit(username: String, game_id: UUID): Boolean
 }

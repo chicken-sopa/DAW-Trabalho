@@ -13,7 +13,9 @@ class JdbiUsersRepository (
     override fun createUser(username: String, password_hash: String): Boolean =
         handle.createUpdate(
             """
-               insert into users(username, password_hash) values
+               insert into users
+               (username, password_hash)
+               values
                (:username, :password)
             """
         )
@@ -79,15 +81,4 @@ class JdbiUsersRepository (
             .bind("token", token)
             .bind("username", username)
             .execute() == 1
-
-    override fun getUserRankingPointsByUsername(username: String): Int? =
-        handle.createQuery(
-            """
-               select ranking_points from users
-               where username = :username
-            """
-        )
-            .bind("username", username)
-            .mapTo<Int>()
-            .singleOrNull()
 }
