@@ -1,4 +1,4 @@
-package repository.jdbi
+package repository.jdbi.utils
 
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.KotlinPlugin

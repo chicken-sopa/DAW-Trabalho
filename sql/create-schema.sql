@@ -62,8 +62,8 @@ create or replace view ranking as
 	order by ranking_points desc
 );
 
-create table if not exists matchmakingRequest(
-    searching_time timestamp,
+create table if not exists matchmakingrequests(
+    timestamp timestamp,
     p1 varchar unique not null,
     p2 varchar,
     mode varchar not null,

@@ -1,8 +1,8 @@
 insert into users values
-('TEST_USER_1', 'mypasswordhash');
+('TESTUSER1', 'SDKJLSDFLKJSDFKJSFDJKLSDFKLS');
 
 insert into users values
-('TEST_USER_2', 'mypasswordhash');
+('TESTUSER2', 'SDKJLSDFLKJSDFKJSFDJKLSDFKLS');
 
 insert into gamemodes values
 (

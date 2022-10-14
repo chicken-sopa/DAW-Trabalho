@@ -6,8 +6,8 @@ import org.postgresql.ds.PGSimpleDataSource
 import repository.Transaction
 import repository.TransactionManager
 import repository.jdbi.JdbiGameModesRepository
-import repository.jdbi.JdbiTransaction
-import repository.jdbi.configure
+import repository.jdbi.utils.JdbiTransaction
+import repository.jdbi.utils.configure
 
 private const val CONNECTION_STRING = "jdbc:postgresql://localhost:5432/db?user=dbuser&password=changeit"
 

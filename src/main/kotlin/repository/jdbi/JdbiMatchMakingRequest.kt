@@ -12,12 +12,12 @@ class JdbiMatchMakingRequest (
     override fun create(matchMakingRequest: MatchMakingRequest): Boolean =
         handle.createUpdate(
             """
-               insert into matchmakingRequest
+               insert into matchmakingrequests
                values
-               (:searching_time, :p1, :p2, :mode, :game_id)
+               (:timestamp, :p1, :p2, :mode, :game_id)
             """
         )
-            .bind("searching_time", matchMakingRequest.searching_time)
+            .bind("timestamp", matchMakingRequest.timestamp)
             .bind("p1", matchMakingRequest.p1)
             .bind("p2", matchMakingRequest.p2)
             .bind("mode", matchMakingRequest.mode)
@@ -27,17 +27,19 @@ class JdbiMatchMakingRequest (
     override fun update(matchMakingRequest: MatchMakingRequest): Boolean  =
         handle.createUpdate(
             """
-               update matchmakingRequest set
-               searching_time = :searching_time, 
+               update matchmakingqequests set
+               timestamp = :timestamp, 
                p1 = :p1,
                p2 = :p2, 
                mode = :mode,
                game_id = :game_id
                
-               where p1 = :p1 or p2 = :p1
+               where 
+               p1 = :p1 or
+               p2 = :p1
             """
         )
-            .bind("searching_time", matchMakingRequest.searching_time)
+            .bind("timestamp", matchMakingRequest.timestamp)
             .bind("p1", matchMakingRequest.p1)
             .bind("p2", matchMakingRequest.p2)
             .bind("mode", matchMakingRequest.mode)
@@ -47,7 +49,9 @@ class JdbiMatchMakingRequest (
     override fun deleteByUsername(username: String): Boolean =
         handle.createUpdate(
             """
-                delete from matchmakingRequest where p1 = :username or p2 = :username
+                delete from matchmakingqequests where
+                p1 = :username or
+                p2 = :username
             """
         )
 
@@ -57,7 +61,10 @@ class JdbiMatchMakingRequest (
     override fun getByUsername(username: String): MatchMakingRequest? =
         handle.createQuery(
             """
-               select * from matchmakingRequest where p1 = :username or p2 = :username
+               select * from matchmakingqequests
+               where
+               p1 = :username or 
+               p2 = :username
             """
         )
             .bind("username", username)

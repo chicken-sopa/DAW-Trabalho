@@ -1,4 +1,4 @@
-package repository.jdbi
+package repository.jdbi.utils
 
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
@@ -6,6 +6,9 @@ import repository.*
 import repository.interfaces.GamesRepository
 import repository.interfaces.SystemRepository
 import repository.interfaces.UsersRepository
+import repository.jdbi.JdbiGamesRepository
+import repository.jdbi.JdbiSystemRepository
+import repository.jdbi.JdbiUsersRepository
 
 class JdbiTransaction (
     private val handle: Handle

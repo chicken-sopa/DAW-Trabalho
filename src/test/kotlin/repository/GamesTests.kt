@@ -13,8 +13,8 @@ import kotlin.test.assertNotNull
 
 class GameTests {
 
-    private val username1 = "TEST_USER_1"
-    private val username2 = "TEST_USER_2"
+    private val username1 = "TESTUSER1"
+    private val username2 = "TESTUSER2"
 
     private fun checkDBEnvironment(handle: Handle) {
         val usersRepo = JdbiUsersRepository(handle)
