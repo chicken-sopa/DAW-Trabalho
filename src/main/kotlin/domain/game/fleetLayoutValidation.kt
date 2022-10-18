@@ -1,6 +1,8 @@
 package domain.game
 
 import Result
+import domain.BoardDimensions
+import domain.ShipConfiguration
 
 typealias FleetLayoutValidation = Result<FleetError, Unit>
 

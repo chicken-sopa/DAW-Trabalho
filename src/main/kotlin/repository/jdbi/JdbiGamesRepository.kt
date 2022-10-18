@@ -1,5 +1,8 @@
 package repository.jdbi
 
+import domain.BoardDimensions
+import domain.GameMode
+import domain.ShipConfiguration
 import domain.game.*
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo

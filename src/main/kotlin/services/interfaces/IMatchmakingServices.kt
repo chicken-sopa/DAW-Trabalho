@@ -1,12 +1,18 @@
 package services.interfaces
 
-import domain.game.GameMode
+import domain.GameMode
 import java.util.*
 
 sealed class JoinMatchmakingResult {
     data class Joint(val game_id: UUID): JoinMatchmakingResult()
     object InQueue: JoinMatchmakingResult()
 }
+
+data class MatchmakingState(
+    val complete: Boolean,
+    val gameModeName: String,
+    val gameId: UUID? = null
+)
 
 interface IMatchmakingServices {
 
@@ -29,4 +35,7 @@ interface IMatchmakingServices {
      * If not in matchmaking +
      * */
     fun leave(username: String): Boolean
+
+
+    fun getState(username: String): MatchmakingState
 }

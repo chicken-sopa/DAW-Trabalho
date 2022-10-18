@@ -1,4 +1,4 @@
-package domain.game
+package domain
 
 data class BoardDimensions(val rows_num: Int, val cols_num: Int)
 data class ShipConfiguration(val quantity: Int, val ship_size: Int)

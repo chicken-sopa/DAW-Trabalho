@@ -1,6 +1,7 @@
+### Q
+- PUT /api/games/matchmaking/leave está errado por ter a ação no URL?
+
 ### TODO
-
-
 - Tests for validateFleetLayout
 - Matchmaking Logic:
   - DB Schema

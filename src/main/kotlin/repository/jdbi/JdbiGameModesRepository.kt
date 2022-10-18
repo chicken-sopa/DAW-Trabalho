@@ -1,8 +1,8 @@
 package repository.jdbi
 
-import domain.game.BoardDimensions
-import domain.game.GameMode
-import domain.game.ShipConfiguration
+import domain.BoardDimensions
+import domain.GameMode
+import domain.ShipConfiguration
 import io.leangen.geantyref.TypeToken
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo

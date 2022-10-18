@@ -1,6 +1,7 @@
 package repository.interfaces
 
-import domain.game.GameMode
+import domain.GameMode
+
 
 interface GameModesRepository {
     fun getGameModes(): List<GameMode>

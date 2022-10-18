@@ -1,6 +1,7 @@
 package services
 
 import Result
+import domain.GameMode
 import domain.game.*
 import repository.TransactionManager
 import services.interfaces.IGameServices
@@ -54,6 +55,10 @@ class GameServices(
     }
 
     override fun forfeit(username: String, game_id: UUID): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun getGameModes(): List<GameMode> {
         TODO("Not yet implemented")
     }
 }

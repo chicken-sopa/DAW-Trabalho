@@ -1,5 +1,6 @@
 package services.interfaces
 
+import domain.GameMode
 import domain.game.*
 import java.sql.Timestamp
 import java.util.*
@@ -28,4 +29,6 @@ interface IGameServices {
      *  false if could not forfeit (Ex: game already over)
      * */
     fun forfeit(username: String, game_id: UUID): Boolean
+
+    fun getGameModes(): List<GameMode>
 }
