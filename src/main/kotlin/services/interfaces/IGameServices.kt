@@ -20,7 +20,7 @@ interface IGameServices {
     fun getOpponentFleet(username: String, game_id: UUID): List<OpponentShip>
 
     // Inform the user about the overall state of a game, namely: game phase (layout definition phase, shooting phase, completed phase).
-    fun getGame(username: String, game_id: UUID): LimitedGame // TODO: Needs to be a different game with less information
+    fun getGame(username: String, game_id: UUID): LimitedGame
 
     /**
      * Forfeit from Game
