@@ -18,7 +18,7 @@ class GameServices(
     override fun makeShot(username: String, game_id: UUID, shot: Shot): Boolean {
         return transactionManager.run {
             val gamesRepo = it.gamesRepository
-            val game: Game? = gamesRepo.getById(game_id)
+            val game = gamesRepo.getById(game_id)
             // TODO: throw GameNotFound later
             requireNotNull(game)
 
@@ -29,14 +29,14 @@ class GameServices(
             // updateGame and save in database
             val resultOfMakeShot = game.makeShot(game.turn, shot)
 
-            if (resultOfMakeShot is Result.Success) {
+            if (resultOfMakeShot is Result.Success<*>) {
                 val updatedGame = resultOfMakeShot.value
-                val updateResult = gamesRepo.update(updatedGame)
+                //val updateResult = gamesRepo.update(updatedGame)
 
                 // if bd update does not go right the send error
-                if (!updateResult) {
+                //if (!updateResult) {
                     // Error Updating Remote Game
-                }
+                //}
             }
             true
         }

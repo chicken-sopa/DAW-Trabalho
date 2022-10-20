@@ -8,8 +8,8 @@ data class PasswordValidationError(override val message: String): Throwable()
 data class User(
     val username: String,
     val password_hash: String,
-    val games_played: Int,
-    val games_won: Int,
+    val games_played: Int = 0,
+    val games_won: Int = 0,
     val ranking_points: Int = 0
 ) {
     init {
