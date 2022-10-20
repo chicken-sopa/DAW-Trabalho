@@ -46,7 +46,7 @@ create table if not exists games(
 
 	-- 0: PLAYER1 | 1: PLAYER1
 	turn_shots_counter int not null,
-	turn varchar not null,
+	turn varchar,
 	turn_deadline timestamp,
 	layout_phase_deadline timestamp,
 	

@@ -36,7 +36,8 @@ data class Game(
     val p1_missed_shots: Set<Shot> = setOf(),
     val p2_missed_shots: Set<Shot> = setOf(),
 
-    val turn: Player = Player.PLAYER1,
+    // null while in LAYOUT_PHASE
+    val turn: Player? = null,
     val turn_shots_counter: Int = mode.shots_per_round,
     // val turn: Player = Player.PLAYER1,
     val turn_deadline: Timestamp? = null,

@@ -11,4 +11,5 @@ interface MatchMakingRequestRepository {
     fun deleteByUsername(username: String): Boolean?
 
     fun getByUsername(username: String): MatchMakingRequest?
+
 }

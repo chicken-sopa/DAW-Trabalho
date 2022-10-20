@@ -34,7 +34,7 @@ interface IMatchmakingServices {
      * If the game has already started return false
      * If not in matchmaking +
      * */
-    fun leave(username: String): Boolean
+    fun cancelSearch(username: String): Boolean
 
 
     fun getState(username: String): MatchmakingState

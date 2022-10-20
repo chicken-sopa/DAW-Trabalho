@@ -18,13 +18,13 @@ data class LimitedGame(
     val my_missed_shots: Set<Shot>,
     val opponent_missed_shots: Set<Shot>,
 
-    val turn: Player,
+    val turn: String?,
     val turn_shots_counter: Int,
     val turn_deadline: Timestamp?,
 
     val layout_phase_deadline: Timestamp?,
 
-    val winner: Player?,
+    val winner: String?,
     val phase: GamePhase,
     val result: GameResult?
 ) {
