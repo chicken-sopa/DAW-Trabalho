@@ -1,6 +1,7 @@
 package repository.jdbi
 
 import domain.User
+import domain.UserRanking
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
 import repository.interfaces.UsersRepository
@@ -10,10 +11,12 @@ class JdbiUsersRepository (
     private val handle: Handle
 ): UsersRepository {
 
-    override fun createUser(user: User): Boolean =
+    override fun create(user: User): Boolean =
         handle.createUpdate(
             """
-               insert into users(username, password_hash) values
+               insert into users
+               (username, password_hash)
+                values
                (:username, :password)
             """
         )
@@ -21,7 +24,7 @@ class JdbiUsersRepository (
             .bind("password", user.password_hash)
             .execute() == 1
 
-    override fun updateUser(user: User): Boolean =
+    override fun update(user: User): Boolean =
         handle.createUpdate(
             """
                update users set
@@ -37,7 +40,7 @@ class JdbiUsersRepository (
             .bind("ranking_points", user.ranking_points)
             .execute() == 1
 
-    override fun getUserByUsername(username: String): User? =
+    override fun getByUsername(username: String): User? =
         handle.createQuery(
             """
                select * from users where username = :username
@@ -47,17 +50,7 @@ class JdbiUsersRepository (
             .mapTo<User>()
             .singleOrNull()
 
-    override fun userExistsByUsername(username: String): Boolean =
-        handle.createQuery(
-            """
-               select count(*) from users where username = :username
-            """
-        )
-            .bind("username", username)
-            .mapTo<Int>()
-            .single() == 1
-
-    override fun getUserByToken(token: UUID): User? =
+    override fun getUserByToken(token: String): User? =
         handle.createQuery(
             """
                select u.username, u.password_hash, u.ranking_points
@@ -72,12 +65,13 @@ class JdbiUsersRepository (
     override fun createToken(token: UUID, username: String): Boolean =
         handle.createUpdate(
             """
-               insert into tokens(token_value, username) values
+               insert into tokens
+               (token_value, username)
+                values
                (:token, :username) 
             """
         )
             .bind("token", token)
             .bind("username", username)
             .execute() == 1
-
 }

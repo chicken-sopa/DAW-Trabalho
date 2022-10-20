@@ -6,15 +6,14 @@ import java.util.UUID
 
 interface UsersRepository {
 
-    fun createUser(user: User): Boolean
+    fun create(user: User): Boolean
 
-    fun updateUser(user: User): Boolean
+    fun update(user: User): Boolean
 
-    fun getUserByUsername(username: String): User?
-
-    fun userExistsByUsername(username: String): Boolean
+    fun getByUsername(username: String): User?
 
     fun getUserByToken(token: String): User?
 
-    fun createToken(token: UUID, username: String): Boolean
+    fun createToken(token: String, username: String): Boolean
+
 }

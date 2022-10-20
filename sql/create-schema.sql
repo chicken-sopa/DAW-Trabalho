@@ -11,12 +11,12 @@ create table if not exists users (
 );
 
 create table if not exists tokens (
-	token_value uuid not null,
+	token_hash varchar not null,
 	username varchar(15) not null,
 
 	constraint fk_username foreign key (username) references users(username) on delete cascade,
 
-	primary key (token_value, username)
+	primary key (token_hash, username)
 );
 
 create table if not exists gamemodes(
@@ -58,8 +58,11 @@ create table if not exists games(
 -- VIEWS
 create or replace view ranking as
 (
-	select ranking_points from users
-	order by ranking_points desc
+	select
+   		row_number() over() as position, username, ranking_points as points
+	from (
+	  select * from users order by ranking_points desc
+	) as rk
 );
 
 create table if not exists matchmakingrequests(

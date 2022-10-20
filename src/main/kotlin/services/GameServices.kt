@@ -1,6 +1,5 @@
 package services
 
-import Result
 import domain.GameMode
 import domain.game.*
 import repository.TransactionManager
@@ -27,9 +26,9 @@ class GameServices(
             // pass "player" to game.makeShot(player, shot)
 
             // updateGame and save in database
-            val resultOfMakeShot = game.makeShot(game.turn, shot)
+            // val resultOfMakeShot = game.makeShot(game.turn, shot)
 
-            if (resultOfMakeShot is Result.Success<*>) {
+            /*if (resultOfMakeShot is Result.Success<*>) {
                 val updatedGame = resultOfMakeShot.value
                 //val updateResult = gamesRepo.update(updatedGame)
 
@@ -37,7 +36,7 @@ class GameServices(
                 //if (!updateResult) {
                     // Error Updating Remote Game
                 //}
-            }
+            }*/
             true
         }
     }
@@ -50,7 +49,7 @@ class GameServices(
         TODO("Not yet implemented")
     }
 
-    override fun getGame(username: String, game_id: UUID): LimitedGame {
+    override fun get(username: String, game_id: UUID): LimitedGame {
         TODO("Not yet implemented")
     }
 

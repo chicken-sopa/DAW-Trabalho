@@ -7,11 +7,16 @@
   - DB Schema
   - Repository
   - Services (with Games?)
-- Implementation
+- Implement Services
+- use password and token encoders
+- create function to verify hashes
+- Function canBeToken(potential_token: String)
+- Add beans to springbootapplication(encoders + jdbi data source)
 - API Interfaces + Implementation
 - Logging
 - Testing Domain
 - Testing Repository
+- Pass gson into json parser (abstract it)
 
 
 ### Matchmaking Idea

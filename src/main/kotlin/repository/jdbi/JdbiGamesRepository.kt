@@ -101,7 +101,7 @@ data class GameDbModel(
     val p1_missed_shots: String,
     val p2_missed_shots: String,
 
-    val turn: Player,
+    val turn: Player?,
     val turn_shots_counter: Int,
     val turn_deadline: Timestamp?,
     val layout_phase_deadline: Timestamp?,
@@ -116,9 +116,9 @@ data class GameDbModel(
     val shots_timeout_s: Int
 ) {
     fun toGame(): Game {
-        val ships_configuration_list_type = object : TypeToken<List<ShipConfiguration>>() {}.type
-        val shots_set_type = object : TypeToken<Set<Shot>>() {}.type
-        val ships_set_type = object : TypeToken<Set<Ship>>() {}.type
+        val shipsConfigurationListType = object : TypeToken<List<ShipConfiguration>>() {}.type
+        val shotsSetType = object : TypeToken<Set<Shot>>() {}.type
+        val shipsSetType = object : TypeToken<Set<Ship>>() {}.type
 
         return gson().let { gson ->
             Game(
@@ -126,15 +126,15 @@ data class GameDbModel(
                 GameMode(
                     mode_name = mode_name,
                     board_dimensions = gson.fromJson(board_dimensions, BoardDimensions::class.java),
-                    ships_configurations = gson.fromJson(ships_configuration, ships_configuration_list_type),
+                    ships_configurations = gson.fromJson(ships_configuration, shipsConfigurationListType),
                     shots_per_round, layout_timeout_s, shots_timeout_s
                 ),
                 p1,
                 p2,
-                p1_fleet = gson.fromJson(p1_fleet, ships_set_type),
-                p2_fleet = gson.fromJson(p2_fleet, ships_set_type),
-                p1_missed_shots = gson.fromJson(p1_missed_shots, shots_set_type),
-                p2_missed_shots = gson.fromJson(p2_missed_shots, shots_set_type),
+                p1_fleet = gson.fromJson(p1_fleet, shipsSetType),
+                p2_fleet = gson.fromJson(p2_fleet, shipsSetType),
+                p1_missed_shots = gson.fromJson(p1_missed_shots, shotsSetType),
+                p2_missed_shots = gson.fromJson(p2_missed_shots, shotsSetType),
                 turn,
                 turn_shots_counter,
                 turn_deadline,

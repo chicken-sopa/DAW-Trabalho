@@ -15,4 +15,8 @@ interface IStatsServices {
 
     // Obtain statistical and ranking information, such as number of played games and users ranking, by an unauthenticated user.
     fun getRanking(): List<UserRanking>
+
+    fun getRanking(offset: Int, limit: Int): List<UserRanking>
+
+    fun getUserRanking(username: String): UserRanking
 }

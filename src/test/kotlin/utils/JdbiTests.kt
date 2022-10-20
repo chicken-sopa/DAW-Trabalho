@@ -6,6 +6,7 @@ import org.postgresql.ds.PGSimpleDataSource
 import repository.Transaction
 import repository.TransactionManager
 import repository.jdbi.JdbiGameModesRepository
+import repository.jdbi.JdbiUsersRepository
 import repository.jdbi.utils.JdbiTransaction
 import repository.jdbi.utils.configure
 
@@ -46,10 +47,8 @@ fun testWithTransactionManagerAndRollback(block: (TransactionManager) -> Unit) =
 // REMOVE LATER
 fun main() {
     testWithHandleAndRollback {
-        val gamesRepo = JdbiGameModesRepository(it)
+        val repo = JdbiUsersRepository(it)
 
-        val gameModes = gamesRepo.getGameModes()
-        val testGameMode = gamesRepo.getGameModeByName("Some Unexisting mode")
-        println(testGameMode)
+        println(repo.getUserRanking("TESTUSER2"))
     }
 }

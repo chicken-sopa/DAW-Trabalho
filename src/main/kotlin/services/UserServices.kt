@@ -1,83 +1,92 @@
 package services
 
-import domain.PasswordValidationInfo
 import org.springframework.security.crypto.password.PasswordEncoder
 import domain.User
 import repository.TransactionManager
 import services.interfaces.IUserServices
-import utils.TokenEncoder
-import java.lang.Error
-import java.util.UUID
+import services.logic.UserLogic
+import services.logic.TokenLogic
+
+sealed class UserErrors: Throwable() {
+    object UserDoesNotExist: UserErrors()
+    object InvalidUsernameOrPassword: UserErrors()
+    object IncorrectPassword: UserErrors()
+    object InvalidTokenFormat: UserErrors()
+
+    data class InvalidPassword(override val message: String): UserErrors()
+    data class InvalidUsername(override val message: String): UserErrors()
+
+    object OperationErrors {
+        object CouldNotCreateToken: UserErrors()
+        object CouldNotCreateUser: UserErrors()
+    }
+}
 
 class UsersService(
     private val transactionManager: TransactionManager,
     private val passwordEncoder: PasswordEncoder,
-    //private val tokenEncoder: TokenEncoder,
-    /*
     private val userLogic: UserLogic,
-    private val passwordEncoder: PasswordEncoder,
-    private val tokenEncoder: TokenEncoder,
-    */
-): IUserServices{
+    private val tokenLogic: TokenLogic,
+): IUserServices {
 
     override fun createUser(username: String, password: String): Boolean {
+        // Parameters Validation using Logic
+        if (username.isBlank() || password.isBlank())
+            throw UserErrors.InvalidUsernameOrPassword
 
-        User.validateUsername(username)
-        User.validatePassword(password)
+        userLogic.validateUsername(username)
+        userLogic.validatePassword(password)
 
+        // Preparations
         val passwordHash = passwordEncoder.encode(password)
         val newUser = User(username, passwordHash)
 
+        // Transaction where the DB accesses happen
         return transactionManager.run {
-            val usersRepository = it.usersRepository
-            if (usersRepository.userExistsByUsername(username)) {
-                throw Error("User already exists!")
-            } else {
+            val usersRepository = it.usersRepo
 
-                usersRepository.createUser(newUser)
+            if (usersRepository.getByUsername(username) != null)
+                throw UserErrors.UserDoesNotExist
 
-            }
+            if (!usersRepository.create(newUser))
+                throw UserErrors.OperationErrors.CouldNotCreateUser
+
+            return@run true
         }
     }
 
-    override fun login(username: String, password: String): UUID {
-        TODO("Not yet implemented")
-    }
+    override fun login(username: String, password: String): String {
+        if (username.isBlank() || password.isBlank())
+            throw UserErrors.InvalidUsernameOrPassword
 
-
-    override fun createToken(username: String, password: String): UUID {
-        if (username.isBlank() || password.isBlank()) {
-            throw Error("User or Password invalid!")
-        }
         return transactionManager.run {
-            val usersRepository = it.usersRepository
-            val user: User = usersRepository.getUserByUsername(username) ?: throw Error("User Not Found")
+            val usersRepo = it.usersRepo
+            val user: User = usersRepo.getByUsername(username)
+                ?: throw UserErrors.UserDoesNotExist
 
-            if (!passwordEncoder.matches(password, user.password_hash)) {
-               throw Error("UserOrPasswordAreInvalid")
-            }
-            val token = UUID.randomUUID()
-            if(!usersRepository.createToken(token, user.username)) throw Error("Can´t create token")
-            return@run token
+            if (!passwordEncoder.matches(password, user.password_hash))
+                throw UserErrors.IncorrectPassword
+
+            val newToken = tokenLogic.generateToken()
+            val hashedToken = tokenLogic.hashToken(newToken)
+
+            if (!usersRepo.createToken(hashedToken, user.username))
+                throw UserErrors.OperationErrors.CouldNotCreateToken
+
+            return@run newToken
         }
     }
 
     override fun getUserByToken(token: String): User? {
-        /*if (!userLogic.canBeToken(token)) {
-            return null
-        }*/
+        if (!tokenLogic.canBeToken(token))
+            throw UserErrors.InvalidTokenFormat
+
+        val tokenHash = tokenLogic.hashToken(token)
 
         return transactionManager.run {
-            val usersRepository = it.usersRepository
-            usersRepository.getUserByToken(token)
+            val usersRepository = it.usersRepo
 
+            return@run usersRepository.getUserByToken(tokenHash)
         }
     }
-
-    /*private fun userNotFound(): TokenCreationResult {
-        passwordEncoder.encode("changeit")
-        return Either.Left(TokenCreationError.UserOrPasswordAreInvalid)
-    }*/
-
-
 }

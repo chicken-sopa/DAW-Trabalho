@@ -1,8 +1,8 @@
 package utils
 
-import domain.game.BoardDimensions
-import domain.game.GameMode
-import domain.game.ShipConfiguration
+import domain.BoardDimensions
+import domain.GameMode
+import domain.ShipConfiguration
 
 // Note: Needs to be in sync with DB. Fix Later
 val testGameMode = GameMode(

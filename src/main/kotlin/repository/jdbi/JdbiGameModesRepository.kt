@@ -46,12 +46,12 @@ data class GameModeDBModel(
 ) {
     fun toGameMode(): GameMode =
         gson().let { gson ->
-            val ships_configuration_list_type = object : TypeToken<List<ShipConfiguration>>() {}.type
+            val shipsConfigurationListType = object : TypeToken<List<ShipConfiguration>>() {}.type
 
             GameMode(
                 mode_name,
                 gson.fromJson(board_dimensions, BoardDimensions::class.java),
-                gson.fromJson(ships_configuration, ships_configuration_list_type),
+                gson.fromJson(ships_configuration, shipsConfigurationListType),
                 shots_per_round,
                 layout_timeout_s,
                 shots_timeout_s

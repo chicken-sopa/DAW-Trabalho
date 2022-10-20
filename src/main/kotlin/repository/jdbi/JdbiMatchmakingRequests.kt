@@ -3,11 +3,11 @@ package repository.jdbi
 import domain.MatchMakingRequest
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
-import repository.interfaces.MatchMakingRequestRepository
+import repository.interfaces.MatchmakingRequestsRepository
 
-class JdbiMatchMakingRequest (
+class JdbiMatchmakingRequests (
     private val handle: Handle
-): MatchMakingRequestRepository {
+): MatchmakingRequestsRepository {
 
     override fun create(matchMakingRequest: MatchMakingRequest): Boolean =
         handle.createUpdate(

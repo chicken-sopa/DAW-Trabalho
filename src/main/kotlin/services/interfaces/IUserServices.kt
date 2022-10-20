@@ -11,12 +11,11 @@ import java.util.UUID
 interface IUserServices {
 
     // Allow an user to create a new user.
-    fun createUser(username: String, passwordHash: String): Boolean
+    fun createUser(username: String, password: String): Boolean
 
     // Allow an user to login to his account.
-    fun login(username: String, password: String): UUID
+    fun login(username: String, password: String): String
 
     fun getUserByToken(token: String): User?
 
-    fun createToken(username: String, password: String): UUID
 }

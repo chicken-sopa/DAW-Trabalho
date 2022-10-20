@@ -1,14 +1,15 @@
 package repository
 
-import repository.interfaces.GamesRepository
-import repository.interfaces.SystemRepository
-import repository.interfaces.UsersRepository
+import repository.interfaces.*
 
 interface Transaction {
 
     val systemRepository: SystemRepository
-    val usersRepository: UsersRepository
+    val usersRepo: UsersRepository
     val gamesRepository: GamesRepository
+    val gameModesRepository: GameModesRepository
+    val matchmakingRequestsRepository: MatchmakingRequestsRepository
+    val rankingRepository: RankingRepository
 
     fun rollback()
 }

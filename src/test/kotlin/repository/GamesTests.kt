@@ -19,8 +19,8 @@ class GameTests {
     private fun checkDBEnvironment(handle: Handle) {
         val usersRepo = JdbiUsersRepository(handle)
 
-        assertNotNull(usersRepo.getUserByUsername(username1))
-        assertNotNull(usersRepo.getUserByUsername(username2))
+        assertNotNull(usersRepo.getByUsername(username1))
+        assertNotNull(usersRepo.getByUsername(username2))
     }
 
     @Test
