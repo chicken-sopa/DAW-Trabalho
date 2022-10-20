@@ -1,7 +1,7 @@
 package domain
 
 data class UserRanking(
-    val username: String,
+    val position: Int,
     val points: Int,
-    val position: Int
+    val username: String,
 )
